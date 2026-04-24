@@ -3,32 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student | SeGo</title>
+    <title>Student | UiTM Carpool</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #f59e0b; --slate: #94a3b8; }
+        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #f59e0b; --slate: #94a3b8; --green: #22c55e; --red: #ef4444; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .container { width: 100%; max-width: 450px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-left: 5px solid var(--blue); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .booking-card { border-left-color: var(--amber); background: rgba(245, 158, 11, 0.05); border: 1px solid var(--amber); }
         .btn { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
-        
-        /* Live Chat Styles */
         #chatBox { background: rgba(15, 23, 42, 0.8); border-radius: 10px; height: 180px; overflow-y: auto; padding: 10px; margin: 15px 0; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; }
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; }
         .msg.me { align-self: flex-end; background: var(--blue); color: white; border-bottom-right-radius: 2px; }
-        .msg.them { align-self: flex-start; background: #334155; color: white; border-bottom-left-radius: 2px; }
+        .msg.them { align-self: flex-start; background: #475569; color: white; border-bottom-left-radius: 2px; }
         .chat-input-area { display: flex; gap: 8px; margin-top: 10px; }
         .chat-input-area input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center;">🚗 SeGo</h1>
-        <p style="text-align: center; color: var(--slate); margin-top: -15px; margin-bottom: 30px;"></p>
-        <div id="list">Connecting...</div>
+        <h1 style="text-align: center; margin-bottom: 5px;">🚗 UiTM Carpool</h1>
+        <p style="text-align: center; color: var(--slate); margin-bottom: 30px;">Student Portal</p>
+        <div id="list">Connecting to services...</div>
     </div>
 
     <script>
@@ -50,6 +48,9 @@
                 const activeTrip = driversArray.find(d => d.id === myBookedId && d.status === 'BOOKED');
 
                 if (activeTrip) {
+                    // Simpan ID untuk rating nanti
+                    localStorage.setItem('pending_rating_id', activeTrip.id);
+
                     html = `
                         <div class="card booking-card">
                             <h2 style="color:var(--amber); margin-top:0;">Trip Confirmed</h2>
@@ -69,6 +70,14 @@
                     loadChats(activeTrip.id);
                 } else {
                     localStorage.removeItem('booked_driver_id');
+                    
+                    // Trigger Rating jika ada trip yang baru tamat
+                    const lastId = localStorage.getItem('pending_rating_id');
+                    if(lastId) {
+                        askForRating(lastId);
+                        localStorage.removeItem('pending_rating_id');
+                    }
+
                     const online = driversArray.filter(d => d.status === 'ON');
                     if(online.length > 0) {
                         online.forEach(d => {
@@ -76,7 +85,10 @@
                                 <div class="card">
                                     <h3>${d.name}</h3>
                                     <p style="color:var(--slate);">${d.car} [${d.plate}]</p>
-                                    <button class="btn" onclick="book('${d.id}')">BOOK NOW</button>
+                                    <div style="display:flex; gap:10px;">
+                                        <button class="btn" style="flex:2" onclick="book('${d.id}')">BOOK NOW</button>
+                                        <button onclick="showDriverInfo('${d.id}')" style="flex:1; background:#475569; color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">INFO</button>
+                                    </div>
                                 </div>`;
                         });
                     } else {
@@ -119,7 +131,39 @@
             if(confirm("End trip? This will clear chat history.")) {
                 await db.ref('chats/' + id).remove();
                 localStorage.removeItem('booked_driver_id');
+                // Status driver akan diupdate oleh driver sendiri atau kod di bawah jika perlu
                 location.reload();
+            }
+        }
+
+        // FUNGSI INFO DRIVER & WHATSAPP
+        function showDriverInfo(id) {
+            db.ref('drivers/' + id).once('value').then(s => {
+                const d = s.val();
+                const profile = `Nama: ${d.name}\nNo. Tel: ${d.phone || 'Tiada'}\nRating: ⭐ ${d.rating || 'Baru'}\nTrip Selesai: ${d.total_trips || '0'}`;
+                
+                if(confirm("PROFIL DRIVER\n\n" + profile + "\n\nKlik OK untuk WhatsApp driver sekarang?")) {
+                    if(d.phone) {
+                        window.open(`https://wa.me/6${d.phone}?text=Hi%20${d.name},%20saya%20student%20UiTM%20nak%20tanya%20pasal%20carpool.`, '_blank');
+                    } else {
+                        alert("Nombor telefon driver tidak dijumpai.");
+                    }
+                }
+            });
+        }
+
+        // FUNGSI RATING
+        async function askForRating(driverId) {
+            const star = prompt("Trip Selesai! Berikan Rating (1-5 bintang):", "5");
+            const feedback = prompt("Ada komen atau feedback untuk driver?");
+
+            if (star) {
+                await db.ref('ratings/' + driverId).push({
+                    stars: parseInt(star),
+                    message: feedback,
+                    time: Date.now()
+                });
+                alert("Terima kasih! Feedback anda telah disimpan.");
             }
         }
     </script>
