@@ -7,61 +7,133 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #fbbc04; --slate: #94a3b8; --google-blue: #8ab4f8; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        :root { 
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --blue: #3b82f6; 
+            --amber: #fbbc04; 
+            --slate: #94a3b8; 
+            --white: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: var(--white); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+
         .container { width: 100%; max-width: 450px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #334155; }
-        
-        /* Login Area */
-        #loginArea { text-align: center; margin-top: 50px; }
-        .input-field { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+
+        /* Card Styles */
+        .card { 
+            background: var(--card); 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin-bottom: 15px; 
+            border: 1px solid #334155; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .input-field { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            border: 1px solid #334155; 
+            background: #0f172a; 
+            color: white; 
+            box-sizing: border-box; 
+        }
+
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s;
+        }
+
         .btn:active { transform: scale(0.98); }
 
-        /* Navigation Tabs */
+        /* Tabs */
         .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { flex: 1; padding: 12px; text-align: center; background: #1e293b; border-radius: 10px; cursor: pointer; font-size: 0.9rem; border: 1px solid #334155; }
+        .tab { 
+            flex: 1; 
+            padding: 12px; 
+            text-align: center; 
+            background: #1e293b; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            border: 1px solid #334155; 
+        }
         .tab.active { background: var(--blue); border-color: var(--blue); font-weight: bold; }
 
-        /* Booking Lists */
-        .booking-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--slate); display: flex; justify-content: space-between; align-items: center; }
-        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
-        .pending { background: #475569; color: white; }
-        .accepted { background: #22c55e; color: white; border-left-color: #22c55e; }
+        /* Booking Items */
+        .booking-item { 
+            background: rgba(255,255,255,0.05); 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-left: 4px solid var(--slate);
+        }
 
-        /* Chat System */
-        #chatBox { height: 160px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155; }
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.85rem; word-wrap: break-word; }
-        .msg.me { align-self: flex-end; background: var(--blue); border-bottom-right-radius: 2px; }
-        .msg.them { align-self: flex-start; background: #475569; border-bottom-left-radius: 2px; }
+        .status-pill { 
+            padding: 4px 10px; 
+            border-radius: 5px; 
+            font-size: 0.7rem; 
+            font-weight: bold; 
+            text-transform: uppercase;
+        }
+        .pending { background: #475569; }
+        .accepted { background: #22c55e; }
 
-        /* Modals */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
-        .modal-content { background: #1a1a1a; padding: 30px 20px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #334155; }
-        .profile-img { width: 70px; height: 70px; background: var(--blue); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; }
-        .star-btn { background: none; border: none; font-size: 35px; cursor: pointer; color: #3c4043; }
-        .star-btn.active { color: var(--amber); }
-        .post-btn { color: var(--google-blue); background: none; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; float: right; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-align: left; }
+        /* Chat */
+        #chatBox { 
+            height: 150px; 
+            overflow-y: auto; 
+            background: #0f172a; 
+            padding: 10px; 
+            border-radius: 10px; 
+            margin: 10px 0; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+        }
+        .msg { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 0.85rem; }
+        .msg.me { align-self: flex-end; background: var(--blue); }
+        .msg.them { align-self: flex-start; background: #475569; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="loginArea">
-            <h1 style="font-size: 3rem; margin-bottom: 0;">🚗 SeGo</h1>
-            <p style="color: var(--slate);">Your Trusted UiTM Carpool</p>
-            <div class="card" style="margin-top: 30px;">
-                <input type="text" id="stuID" class="input-field" placeholder="Student ID (e.g. 2023123456)">
+            <h1 style="text-align: center; font-size: 2.5rem;">🚗 SeGo</h1>
+            <p style="text-align: center; color: var(--slate);">UiTM Carpool Portal</p>
+            <div class="card">
+                <input type="text" id="stuID" class="input-field" placeholder="Student ID (e.g. 2023...)">
                 <input type="text" id="stuName" class="input-field" placeholder="Full Name">
-                <button class="btn" onclick="login()">Login to SeGo</button>
+                <button class="btn" onclick="login()">Login</button>
             </div>
         </div>
 
         <div id="mainApp" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <span>Welcome, <b id="displayStuName"></b></span>
-                <button onclick="logout()" style="background:none; border:none; color:var(--slate); cursor:pointer; font-weight:bold;">LOGOUT</button>
+                <button onclick="logout()" style="background:none; border:none; color:var(--slate); cursor:pointer;">LOGOUT</button>
             </div>
 
             <div class="tab-bar">
@@ -70,49 +142,19 @@
             </div>
 
             <div id="instantSection">
-                <div id="driverList">Searching for available drivers...</div>
+                <div id="driverList">Searching for drivers...</div>
             </div>
 
             <div id="bookingSection" style="display: none;">
                 <div class="card" style="border-top: 4px solid var(--amber);">
-                    <h4 style="margin-top:0;">Schedule a Trip</h4>
-                    <label style="font-size: 0.8rem; color: var(--slate);">Date</label>
+                    <h4 style="margin-top: 0;">Schedule a Trip</h4>
                     <input type="date" id="bookDate" class="input-field">
-                    <label style="font-size: 0.8rem; color: var(--slate);">Time</label>
                     <input type="time" id="bookTime" class="input-field">
-                    <input type="text" id="bookDest" class="input-field" placeholder="To where? (e.g. KTM, Pavillion)">
-                    <button class="btn" style="background:var(--amber); color:black;" onclick="submitBooking()">Request Booking</button>
+                    <input type="text" id="bookDest" class="input-field" placeholder="Where to? (e.g. KTM Puncak)">
+                    <button class="btn" style="background: var(--amber); color: black;" onclick="submitBooking()">Request Pre-Book</button>
                 </div>
-                <h3>My Schedule</h3>
+                <h3>My Bookings</h3>
                 <div id="myBookingsList"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="infoModal" class="modal">
-        <div class="modal-content" style="border-top: 5px solid var(--blue);">
-            <h2 style="margin-top:0;">Driver Profile</h2>
-            <div id="infoBody"></div>
-            <button class="btn" style="background:#475569; margin-top:20px;" onclick="closeModal('infoModal')">Close</button>
-        </div>
-    </div>
-
-    <div id="ratingModal" class="modal">
-        <div class="modal-content">
-            <div class="profile-img" id="driverInitial">?</div>
-            <div style="font-size: 1.2rem; font-weight: bold;" id="rateDriverName">Driver Name</div>
-            <p style="color: #9aa0a6; font-size: 0.8rem;">Posting publicly across SeGo ⓘ</p>
-            <div style="margin: 20px 0;">
-                <button class="star-btn" onclick="setRating(1)">★</button>
-                <button class="star-btn" onclick="setRating(2)">★</button>
-                <button class="star-btn" onclick="setRating(3)">★</button>
-                <button class="star-btn" onclick="setRating(4)">★</button>
-                <button class="star-btn" onclick="setRating(5)">★</button>
-            </div>
-            <textarea id="feedbackText" style="width:100%; height:80px; background:none; border:1px solid #5f6368; color:white; border-radius:8px; padding:10px;" placeholder="Share your experience..."></textarea>
-            <div style="margin-top: 20px; overflow: hidden;">
-                <button class="post-btn" onclick="submitRating()">Post</button>
-                <button class="post-btn" style="color:#9aa0a6; margin-right:20px;" onclick="location.reload()">Cancel</button>
             </div>
         </div>
     </div>
@@ -121,24 +163,26 @@
         // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg",
+            authDomain: "carpool-uitm.firebaseapp.com",
             databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "carpool-uitm"
+            projectId: "carpool-uitm",
+            storageBucket: "carpool-uitm.firebasestorage.app",
+            messagingSenderId: "571429884753",
+            appId: "1:571429884753:web:a02c09a1818a09b77b3970"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentUser = null;
-        let selectedStars = 0;
-        let currentRatingDriverId = "";
+        let currentUser = JSON.parse(localStorage.getItem('sego_user'));
 
-        // LOGIN SYSTEM
+        // LOGIN LOGIC
         function login() {
-            const id = document.getElementById('stuID').value;
-            const name = document.getElementById('stuName').value;
-            if(!id || !name) return alert("Please fill in your ID and Name.");
+            const id = document.getElementById('stuID').value.trim();
+            const name = document.getElementById('stuName').value.trim();
+            if(!id || !name) return alert("Please fill in all fields");
             currentUser = { id, name };
             localStorage.setItem('sego_user', JSON.stringify(currentUser));
-            showApp();
+            location.reload();
         }
 
         function logout() {
@@ -146,15 +190,11 @@
             location.reload();
         }
 
-        function showApp() {
-            const saved = localStorage.getItem('sego_user');
-            if(saved) {
-                currentUser = JSON.parse(saved);
-                document.getElementById('loginArea').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('displayStuName').innerText = currentUser.name;
-                syncData();
-            }
+        if(currentUser) {
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('displayStuName').innerText = currentUser.name;
+            syncData();
         }
 
         function switchTab(type) {
@@ -164,162 +204,117 @@
             document.getElementById('tabBooking').className = type === 'booking' ? 'tab active' : 'tab';
         }
 
-        // SYNC REALTIME DATA
+        // DATA SYNC
         function syncData() {
-            // Live Drivers
+            // 1. DRIVER LIST (With Undefined Filter)
             db.ref('drivers').on('value', (snapshot) => {
                 const data = snapshot.val();
-                let myBookedId = localStorage.getItem('booked_driver_id');
                 let html = "";
+                let myBookedId = localStorage.getItem('booked_driver_id');
 
-                if(data) {
-                    const drivers = Object.values(data);
+                if (data) {
+                    // THE FIX: Filter out nulls and incomplete data objects
+                    const drivers = Object.values(data).filter(d => d && typeof d === 'object' && d.name && d.car);
+
                     const activeTrip = drivers.find(d => d.id === myBookedId && d.status === 'BOOKED');
 
-                    if(activeTrip) {
-                        localStorage.setItem('pending_rating_id', activeTrip.id);
+                    if (activeTrip) {
                         html = `
                         <div class="card" style="border-left: 5px solid var(--amber);">
-                            <h3 style="color:var(--amber); margin-top:0;">Ongoing Trip</h3>
+                            <h3 style="color:var(--amber); margin:0;">Ongoing Trip</h3>
                             <p>Driver: <b>${activeTrip.name}</b> (${activeTrip.car})</p>
                             <div id="chatBox"></div>
-                            <div style="display:flex; gap:8px;">
-                                <input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Message driver...">
-                                <button onclick="sendChat('${activeTrip.id}')" class="btn" style="width:auto;">Send</button>
-                            </div>
-                            <button class="btn" style="background:#475569; margin-top:15px;" onclick="finishTrip('${activeTrip.id}')">FINISH TRIP</button>
+                            <input type="text" id="chatInput" class="input-field" placeholder="Message driver...">
+                            <button class="btn" style="background:#475569; margin-top:10px;" onclick="finishTrip('${activeTrip.id}')">FINISH TRIP</button>
                         </div>`;
                         loadChats(activeTrip.id);
                     } else {
                         localStorage.removeItem('booked_driver_id');
-                        const lastId = localStorage.getItem('pending_rating_id');
-                        if(lastId) { askForRating(lastId); localStorage.removeItem('pending_rating_id'); }
-
-                        const online = drivers.filter(d => d.status === 'ON');
-                        if(online.length > 0) {
-                            online.forEach(d => {
-                                html += `<div class="card">
-                                    <h3>${d.name}</h3>
-                                    <p style="color:var(--slate); font-size:0.9rem;">${d.car} • [${d.plate}]</p>
+                        drivers.forEach(d => {
+                            if (d.status === "ON") {
+                                html += `
+                                <div class="card">
+                                    <div style="font-weight:bold; font-size:1.1rem;">${d.name}</div>
+                                    <div style="color:var(--slate); font-size:0.85rem; margin-bottom:12px;">${d.car} • [${d.plate || 'N/A'}]</div>
                                     <div style="display:flex; gap:10px;">
-                                        <button class="btn" style="flex:2" onclick="bookNow('${d.id}')">BOOK NOW</button>
-                                        <button class="btn" style="flex:1; background:#475569;" onclick="showInfo('${d.id}')">INFO</button>
+                                        <button class="btn" onclick="bookNow('${d.id}')">BOOK NOW</button>
+                                        <button class="btn" style="background:#475569" onclick="alert('Rating: '+ (d.rating || 5))">INFO</button>
                                     </div>
                                 </div>`;
-                            });
-                        } else { html = "<p style='text-align:center; color:var(--slate); margin-top:50px;'>No drivers online. Use Pre-Book!</p>"; }
+                            }
+                        });
                     }
                 }
-                document.getElementById('driverList').innerHTML = html;
+                document.getElementById('driverList').innerHTML = html || "<p style='text-align:center; color:var(--slate); margin-top:50px;'>No drivers online.</p>";
             });
 
-            // My Pre-Bookings
-            db.ref('bookings').on('value', (snap) => {
+            // 2. MY PRE-BOOKINGS
+            db.ref('bookings').on('value', snap => {
                 let html = "";
                 snap.forEach(child => {
                     const b = child.val();
                     if(b.student_id === currentUser.id) {
-                        html += `<div class="booking-item">
+                        html += `
+                        <div class="booking-item">
                             <div>
-                                <div style="font-weight:bold">${b.date} • ${b.time}</div>
-                                <div style="font-size:0.8rem; color:var(--slate)">To: ${b.dest}</div>
-                                <div style="font-size:0.8rem; color:var(--google-blue)">${b.driver_name ? 'Driver Assigned: '+b.driver_name : 'Waiting for driver...'}</div>
+                                <b>${b.date} • ${b.time}</b><br>
+                                <small>To: ${b.dest}</small>
                             </div>
                             <span class="status-pill ${b.status.toLowerCase()}">${b.status}</span>
                         </div>`;
                     }
                 });
-                document.getElementById('myBookingsList').innerHTML = html || "<p style='color:var(--slate)'>No upcoming bookings.</p>";
+                document.getElementById('myBookingsList').innerHTML = html || "<p style='color:var(--slate)'>No history.</p>";
             });
         }
 
         // ACTIONS
         async function bookNow(id) {
-            if(!confirm("Start instant ride with this driver?")) return;
+            if(!confirm("Book this driver?")) return;
             localStorage.setItem('booked_driver_id', id);
             await db.ref('drivers/' + id).update({ status: 'BOOKED' });
         }
 
-        async function submitBooking() {
-            const date = document.getElementById('bookDate').value;
-            const time = document.getElementById('bookTime').value;
-            const dest = document.getElementById('bookDest').value;
-            if(!date || !time || !dest) return alert("Please fill in all booking details.");
-
-            await db.ref('bookings').push({
-                student_id: currentUser.id,
-                student_name: currentUser.name,
-                date, time, dest,
-                status: "PENDING",
-                driver_name: ""
-            });
-            alert("Booking submitted successfully!");
-        }
-
         async function finishTrip(id) {
-            if(confirm("End trip? This will reset the driver's status.")) {
-                localStorage.setItem('pending_rating_id', id);
+            if(confirm("End trip?")) {
                 await db.ref('chats/' + id).remove();
                 await db.ref('drivers/' + id).update({ status: 'ON' });
                 localStorage.removeItem('booked_driver_id');
             }
         }
 
-        // CHAT & MODALS
-        function sendChat(id) {
-            const val = document.getElementById('chatInput').value;
-            if(!val) return;
-            db.ref('chats/' + id).push({ sender: 'student', text: val });
-            document.getElementById('chatInput').value = "";
+        async function submitBooking() {
+            const date = document.getElementById('bookDate').value;
+            const time = document.getElementById('bookTime').value;
+            const dest = document.getElementById('bookDest').value;
+            if(!date || !time || !dest) return alert("Fill all details");
+            
+            await db.ref('bookings').push({
+                student_id: currentUser.id,
+                student_name: currentUser.name,
+                date, time, dest,
+                status: 'PENDING'
+            });
+            alert("Booking request sent!");
         }
 
         function loadChats(id) {
-            db.ref('chats/' + id).on('value', snap => {
+            db.ref('chats/'+id).on('value', s => {
+                let h = ""; s.forEach(m => { h += `<div class="msg ${m.val().sender==='student'?'me':'them'}">${m.val().text}</div>`; });
                 const box = document.getElementById('chatBox');
-                if(!box) return;
-                let h = "";
-                snap.forEach(c => { h += `<div class="msg ${c.val().sender === 'student' ? 'me' : 'them'}">${c.val().text}</div>`; });
-                box.innerHTML = h; box.scrollTop = box.scrollHeight;
+                if(box) { box.innerHTML = h; box.scrollTop = box.scrollHeight; }
             });
+            // Send chat on Enter key
+            document.body.onkeypress = function(e) {
+                if(e.key === 'Enter' && document.activeElement.id === 'chatInput') {
+                    const val = document.getElementById('chatInput').value;
+                    if(val) {
+                        db.ref('chats/'+id).push({sender:'student', text:val});
+                        document.getElementById('chatInput').value = "";
+                    }
+                }
+            }
         }
-
-        function showInfo(id) {
-            db.ref('drivers/' + id).once('value', s => {
-                const d = s.val();
-                document.getElementById('infoBody').innerHTML = `
-                    <div class="info-row"><span>Name</span><b>${d.name}</b></div>
-                    <div class="info-row"><span>Student ID</span><b>${d.student_id || d.STUDENT_ID || 'N/A'}</b></div>
-                    <div class="info-row"><span>Rating</span><b>⭐ ${d.rating || 'New'}</b></div>
-                `;
-                document.getElementById('infoModal').style.display = 'flex';
-            });
-        }
-
-        function askForRating(id) {
-            currentRatingDriverId = id;
-            db.ref('drivers/' + id).once('value', s => {
-                const d = s.val();
-                document.getElementById('rateDriverName').innerText = d.name;
-                document.getElementById('driverInitial').innerText = d.name.charAt(0).toUpperCase();
-                document.getElementById('ratingModal').style.display = 'flex';
-            });
-        }
-
-        function setRating(n) {
-            selectedStars = n;
-            const btns = document.querySelectorAll('.star-btn');
-            btns.forEach((b, i) => b.classList.toggle('active', i < n));
-        }
-
-        async function submitRating() {
-            if(!selectedStars) return alert("Select stars first!");
-            await db.ref('ratings/' + currentRatingDriverId).push({ stars: selectedStars, msg: document.getElementById('feedbackText').value });
-            alert("Thank you!"); location.reload();
-        }
-
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        showApp();
     </script>
 </body>
 </html>
