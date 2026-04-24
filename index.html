@@ -7,35 +7,120 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #f59e0b; --slate: #94a3b8; --green: #22c55e; }
+        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #f59e0b; --slate: #94a3b8; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .container { width: 100%; max-width: 450px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-left: 5px solid var(--blue); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .booking-card { border-left-color: var(--amber); background: rgba(245, 158, 11, 0.05); border: 1px solid var(--amber); }
         .btn { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
+        
+        /* Live Chat Styles */
         #chatBox { background: rgba(15, 23, 42, 0.8); border-radius: 10px; height: 180px; overflow-y: auto; padding: 10px; margin: 15px 0; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; }
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; }
         .msg.me { align-self: flex-end; background: var(--blue); color: white; border-bottom-right-radius: 2px; }
-        .msg.them { align-self: flex-start; background: #475569; color: white; border-bottom-left-radius: 2px; }
-        .chat-area { display: flex; gap: 8px; margin-top: 10px; }
-        .chat-area input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; }
+        .msg.them { align-self: flex-start; background: #334155; color: white; border-bottom-left-radius: 2px; }
+        .chat-input-area { display: flex; gap: 8px; margin-top: 10px; }
+        .chat-input-area input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center; margin-bottom: 5px;">🚗 UiTM Carpool</h1>
-        <p style="text-align: center; color: var(--slate); margin-bottom: 30px;">Student Portal</p>
-        <div id="list">Connecting to services...</div>
+        <h1 style="text-align: center;">🚗 UiTM Carpool</h1>
+        <p style="text-align: center; color: var(--slate); margin-top: -15px; margin-bottom: 30px;"></p>
+        <div id="list">Connecting...</div>
     </div>
 
     <script>
-        /* OBFUSCATED JAVASCRIPT START */
-        const _0x538d=['on','value','getItem','status','BOOKED','find','name','car','plate','chatBox','chatInput','innerHTML','booked_driver_id','drivers/','update','chats/','push','student'];(function(_0x1b4c4d,_0x538d6b){const _0x4d528b=function(_0x26955a){while(--_0x26955a){_0x1b4c4d['push'](_0x1b4c4d['shift']());}};_0x4d528b(++_0x538d6b);}(_0x538d,0x1b3));const _0x4d52=function(_0x1b4c4d,_0x538d6b){_0x1b4c4d=_0x1b4c4d-0x0;let _0x4d528b=_0x538d[_0x1b4c4d];return _0x4d528b;};const firebaseConfig={'apiKey':'AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg','databaseURL':'https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app','projectId':'carpool-uitm'};firebase['initializeApp'](firebaseConfig);const db=firebase['database']();db['ref']('drivers')[_0x4d52('0x0')](_0x4d52('0x1'),_0x1e3f0d=>{const _0x524823=_0x1e3f0d['val']();let _0x48529f=localStorage[_0x4d52('0x2')](_0x4d52('0xc'));let _0x2729b5='';if(_0x524823){const _0x1c8828=Object['values'](_0x524823);const _0x3e176c=_0x1c8828[_0x4d52('0x5')](_0x298412=>_0x298412['id']===_0x48529f&&_0x298412[_0x4d52('0x3')]===_0x4d52('0x4'));if(_0x3e176c){_0x2729b5='<div class="card booking-card"><h2 style="color:var(--amber);margin-top:0;">Ongoing Trip</h2><p style="margin:0;">Driver: <b>'+_0x3e176c[_0x4d52('0x6')]+'</b></p><p style="color:var(--slate);font-size:0.9rem;">'+_0x3e176c[_0x4d52('0x7')]+' • '+_0x3e176c[_0x4d52('0x8')]+'</p><div id="chatBox"></div><div class="chat-area"><input type="text" id="chatInput" placeholder="Reply to driver..."><button onclick="sendChat(\''+_0x3e176c['id']+'\')" style="background:var(--blue);border:none;padding:10px 15px;border-radius:8px;color:white;">Send</button></div><p style="font-size:0.8rem;color:var(--slate);margin-top:15px;text-align:center;">Driver will end the trip once you arrive.</p></div>';loadChats(_0x3e176c['id']);}else{localStorage['removeItem'](_0x4d52('0xc'));const _0x482103=_0x1c8828['filter'](_0x392812=>_0x392812['status']==='ON');if(_0x482103['length']>0x0){_0x482103['forEach'](_0x129382=>{_0x2729b5+='<div class="card"><h3 style="margin-top:0;">'+_0x129382[_0x4d52('0x6')]+'</h3><p style="color:var(--slate);">'+_0x129382[_0x4d52('0x7')]+' ['+_0x129382[_0x4d52('0x8')]+']</p><button class="btn" onclick="book(\''+_0x129382['id']+'\')">BOOK NOW</button></div>';});}else{_0x2729b5='<p style="text-align:center;color:var(--slate);">No drivers online right now.</p>';}}}document['getElementById']('list')[_0x4d52('0xb')]=_0x2729b5;});async function book(_0x1a2938){if(!confirm('Book this driver?'))return;localStorage['setItem'](_0x4d52('0xc'),_0x1a2938);await db['ref'](_0x4d52('0xd')+_0x1a2938)[_0x4d52('0xe')]({'status':_0x4d52('0x4')});}async function sendChat(_0x129381){const _0x482912=document['getElementById'](_0x4d52('0xa'));if(!_0x482912['value']['trim']())return;await db['ref'](_0x4d52('0xf')+_0x129381)[_0x4d52('0x10')]({'sender':_0x4d52('0x11'),'text':_0x482912['value'],'time':Date['now']()});_0x482912['value']='';}function loadChats(_0x291823){db['ref'](_0x4d52('0xf')+_0x291823)['on'](_0x4d52('0x1'),_0x192837=>{const _0x582911=document['getElementById'](_0x4d52('0x9'));if(!_0x582911)return;let _0x482103='';_0x192837['forEach'](_0x382911=>{const _0x128391=_0x382911['val']();_0x482103+='<div class="msg '+(_0x128391['sender']===_0x4d52('0x11')?'me':'them')+'">'+_0x128391['text']+'</div>';});_0x582911[_0x4d52('0xb')]=_0x482103;_0x582911['scrollTop']=_0x582911['scrollHeight'];});}
-    </script>
-</body>
-</html>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg",
+            databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "carpool-uitm"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
+        db.ref('drivers').on('value', (snapshot) => {
+            const data = snapshot.val();
+            let myBookedId = localStorage.getItem('booked_driver_id');
+            let html = "";
+
+            if (data) {
+                const driversArray = Object.values(data);
+                const activeTrip = driversArray.find(d => d.id === myBookedId && d.status === 'BOOKED');
+
+                if (activeTrip) {
+                    html = `
+                        <div class="card booking-card">
+                            <h2 style="color:var(--amber); margin-top:0;">Trip Confirmed</h2>
+                            <p style="margin:0;">Driver: <b>${activeTrip.name}</b></p>
+                            <p style="margin:5px 0; font-size:0.9rem; color:var(--slate);">${activeTrip.car} • ${activeTrip.plate}</p>
+                            
+                            <div id="chatBox"></div>
+                            
+                            <div class="chat-input-area">
+                                <input type="text" id="chatInput" placeholder="Ask about price/time...">
+                                <button onclick="sendChat('${activeTrip.id}')" style="padding:10px 15px; background:var(--blue); border:none; border-radius:8px; color:white; font-weight:bold;">Send</button>
+                            </div>
+                            
+                            <button class="btn" style="background:#475569; margin-top:20px;" onclick="finishTrip('${activeTrip.id}')">FINISH TRIP</button>
+                        </div>
+                    `;
+                    loadChats(activeTrip.id);
+                } else {
+                    localStorage.removeItem('booked_driver_id');
+                    const online = driversArray.filter(d => d.status === 'ON');
+                    if(online.length > 0) {
+                        online.forEach(d => {
+                            html += `
+                                <div class="card">
+                                    <h3>${d.name}</h3>
+                                    <p style="color:var(--slate);">${d.car} [${d.plate}]</p>
+                                    <button class="btn" onclick="book('${d.id}')">BOOK NOW</button>
+                                </div>`;
+                        });
+                    } else {
+                        html = "<div style='text-align:center; padding-top:50px; color:var(--slate);'><h3>No drivers online</h3><p>Try again later.</p></div>";
+                    }
+                }
+            }
+            document.getElementById('list').innerHTML = html;
+        });
+
+        async function book(id) {
+            if(!confirm("Book this driver?")) return;
+            localStorage.setItem('booked_driver_id', id);
+            await db.ref('drivers/' + id).update({ status: 'BOOKED', msg: 'New Booking!' });
+        }
+
+        async function sendChat(driverId) {
+            const input = document.getElementById('chatInput');
+            if(!input.value.trim()) return;
+            await db.ref('chats/' + driverId).push({ sender: 'student', text: input.value, time: Date.now() });
+            input.value = "";
+        }
+
+        function loadChats(driverId) {
+            db.ref('chats/' + driverId).on('value', (snap) => {
+                const chatBox = document.getElementById('chatBox');
+                if(!chatBox) return;
+                let chatHtml = "";
+                snap.forEach(child => {
+                    const m = child.val();
+                    const side = m.sender === 'student' ? 'me' : 'them';
+                    chatHtml += `<div class="msg ${side}">${m.text}</div>`;
+                });
+                chatBox.innerHTML = chatHtml;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        async function finishTrip(id) {
+            if(confirm("End trip? This will clear chat history.")) {
+                await db.ref('chats/' + id).remove();
+                localStorage.removeItem('booked_driver_id');
+                location.reload();
+            }
         }
     </script>
 </body>
