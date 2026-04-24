@@ -7,29 +7,39 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #f59e0b; --slate: #94a3b8; --green: #22c55e; --red: #ef4444; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #fbbc04; --slate: #94a3b8; --google-blue: #8ab4f8; }
+        
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .container { width: 100%; max-width: 450px; }
+        
+        /* Dashboard Cards */
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-left: 5px solid var(--blue); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .booking-card { border-left-color: var(--amber); background: rgba(245, 158, 11, 0.05); border: 1px solid var(--amber); }
+        .booking-card { border-left-color: var(--amber); background: rgba(251, 188, 4, 0.05); border: 1px solid var(--amber); }
+        
         .btn { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
-        
-        /* Chat Styles */
+
+        /* Chat System */
         #chatBox { background: rgba(15, 23, 42, 0.8); border-radius: 10px; height: 180px; overflow-y: auto; padding: 10px; margin: 15px 0; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; }
         .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; }
         .msg.me { align-self: flex-end; background: var(--blue); color: white; border-bottom-right-radius: 2px; }
         .msg.them { align-self: flex-start; background: #475569; color: white; border-bottom-left-radius: 2px; }
-        .chat-input-area { display: flex; gap: 8px; margin-top: 10px; }
-        .chat-input-area input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; }
 
-        /* Rating Modal Styles */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; border: 1px solid var(--amber); }
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-        .star-btn { background: none; border: none; font-size: 35px; cursor: pointer; color: #334155; transition: 0.2s; }
+        /* Modals Base */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        .modal-content { background: #1a1a1a; padding: 30px 20px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; position: relative; }
+
+        /* Google Rating Style */
+        .profile-img { width: 70px; height: 70px; background: var(--blue); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; }
+        .stars { display: flex; justify-content: center; gap: 12px; margin: 20px 0; }
+        .star-btn { background: none; border: none; font-size: 38px; cursor: pointer; color: #3c4043; transition: 0.2s; padding: 0; }
         .star-btn.active { color: var(--amber); }
-        .feedback-input { width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; color: white; border: 1px solid #334155; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; }
+        .review-box { width: 100%; background: transparent; border: 1px solid #5f6368; border-radius: 8px; color: white; padding: 12px; font-size: 1rem; margin-bottom: 20px; box-sizing: border-box; resize: none; min-height: 100px; font-family: inherit; }
+        .post-link { color: var(--google-blue); background: none; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; float: right; }
+
+        /* Driver Info Style */
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 8px; text-align: left; }
+        .wa-btn { display: flex; align-items: center; justify-content: center; background: #25d366; color: white; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -37,22 +47,37 @@
     <div class="container">
         <h1 style="text-align: center; margin-bottom: 5px;">🚗 SeGo</h1>
         <p style="text-align: center; color: var(--slate); margin-bottom: 30px;">Student Portal</p>
-        <div id="list">Connecting to SeGo services...</div>
+        <div id="list">Synchronizing SeGo data...</div>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content" style="border-top: 5px solid var(--blue);">
+            <h2 style="margin-bottom: 20px;">Driver Profile</h2>
+            <div id="infoBody"></div>
+            <button class="btn" style="background:#475569; margin-top:10px;" onclick="closeModal('infoModal')">Close</button>
+        </div>
     </div>
 
     <div id="ratingModal" class="modal">
         <div class="modal-content">
-            <h2 style="color:var(--amber); margin:0;">Rate Your Trip</h2>
-            <p style="color:var(--slate); font-size:0.9rem;">How was your ride with the driver?</p>
-            <div class="stars" id="starContainer">
+            <div class="profile-img" id="driverInitial">?</div>
+            <div style="font-size: 1.3rem; font-weight: 500;" id="rateDriverName">Driver Name</div>
+            <div style="color: #9aa0a6; font-size: 0.85rem; margin-bottom: 20px;">Posting publicly across SeGo ⓘ</div>
+            
+            <div class="stars">
                 <button class="star-btn" onclick="setRating(1)">★</button>
                 <button class="star-btn" onclick="setRating(2)">★</button>
                 <button class="star-btn" onclick="setRating(3)">★</button>
                 <button class="star-btn" onclick="setRating(4)">★</button>
                 <button class="star-btn" onclick="setRating(5)">★</button>
             </div>
-            <textarea id="feedbackText" class="feedback-input" rows="3" placeholder="Any comments? (Optional)"></textarea>
-            <button class="btn" style="background:var(--amber)" onclick="submitRating()">Submit Review</button>
+
+            <textarea id="feedbackText" class="review-box" placeholder="Share details of your own experience with this driver"></textarea>
+            
+            <div style="overflow: hidden;">
+                <button class="post-link" onclick="submitRating()">Post</button>
+                <button class="post-link" style="color:#9aa0a6; margin-right: 20px;" onclick="closeModal('ratingModal')">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -68,6 +93,7 @@
         let selectedStars = 0;
         let currentRatingDriverId = "";
 
+        // Main Listener
         db.ref('drivers').on('value', (snapshot) => {
             const data = snapshot.val();
             let myBookedId = localStorage.getItem('booked_driver_id');
@@ -85,8 +111,8 @@
                             <p style="margin:0;">Driver: <b>${activeTrip.name}</b></p>
                             <p style="margin:5px 0; font-size:0.9rem; color:var(--slate);">${activeTrip.car} • ${activeTrip.plate}</p>
                             <div id="chatBox"></div>
-                            <div class="chat-input-area">
-                                <input type="text" id="chatInput" placeholder="Message driver...">
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="chatInput" placeholder="Message driver..." style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#0f172a; color:white;">
                                 <button onclick="sendChat('${activeTrip.id}')" style="padding:10px 15px; background:var(--blue); border:none; border-radius:8px; color:white; font-weight:bold;">Send</button>
                             </div>
                             <button class="btn" style="background:#475569; margin-top:20px;" onclick="finishTrip('${activeTrip.id}')">FINISH TRIP</button>
@@ -106,95 +132,106 @@
                             html += `
                                 <div class="card">
                                     <h3>${d.name}</h3>
-                                    <p style="color:var(--slate);">${d.car} [${d.plate}]</p>
+                                    <p style="color:var(--slate); font-size:0.9rem;">${d.car} [${d.plate}]</p>
                                     <div style="display:flex; gap:10px;">
                                         <button class="btn" style="flex:2" onclick="book('${d.id}')">BOOK NOW</button>
-                                        <button onclick="showDriverInfo('${d.id}')" style="flex:1; background:#475569; color:white; border:none; border-radius:10px; cursor:pointer;">INFO</button>
+                                        <button onclick="showDriverInfo('${d.id}')" style="flex:1; background:#475569; color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">INFO</button>
                                     </div>
                                 </div>`;
                         });
                     } else {
-                        html = "<div style='text-align:center; padding-top:50px; color:var(--slate);'><h3>No drivers online</h3><p>Try again later.</p></div>";
+                        html = "<div style='text-align:center; padding-top:50px; color:var(--slate);'><h3>No drivers online</h3><p>Please check back later.</p></div>";
                     }
                 }
             }
             document.getElementById('list').innerHTML = html;
         });
 
-        // Booking & Chat Logic
+        // Booking & Chat
         async function book(id) {
-            if(!confirm("Book this driver?")) return;
+            if(!confirm("Start booking with this driver?")) return;
             localStorage.setItem('booked_driver_id', id);
-            await db.ref('drivers/' + id).update({ status: 'BOOKED', msg: 'New Booking!' });
+            await db.ref('drivers/' + id).update({ status: 'BOOKED' });
         }
 
-        async function sendChat(driverId) {
+        async function sendChat(id) {
             const input = document.getElementById('chatInput');
             if(!input.value.trim()) return;
-            await db.ref('chats/' + driverId).push({ sender: 'student', text: input.value, time: Date.now() });
+            await db.ref('chats/' + id).push({ sender: 'student', text: input.value, time: Date.now() });
             input.value = "";
         }
 
-        function loadChats(driverId) {
-            db.ref('chats/' + driverId).on('value', (snap) => {
-                const chatBox = document.getElementById('chatBox');
-                if(!chatBox) return;
-                let chatHtml = "";
-                snap.forEach(child => {
-                    const m = child.val();
-                    const side = m.sender === 'student' ? 'me' : 'them';
-                    chatHtml += `<div class="msg ${side}">${m.text}</div>`;
+        function loadChats(id) {
+            db.ref('chats/' + id).on('value', (snap) => {
+                const box = document.getElementById('chatBox');
+                if(!box) return;
+                let cHtml = "";
+                snap.forEach(c => {
+                    const m = c.val();
+                    cHtml += `<div class="msg ${m.sender === 'student' ? 'me' : 'them'}">${m.text}</div>`;
                 });
-                chatBox.innerHTML = chatHtml;
-                chatBox.scrollTop = chatBox.scrollHeight;
+                box.innerHTML = cHtml;
+                box.scrollTop = box.scrollHeight;
             });
         }
 
-        // Trip End & Rating Modal Logic
-        async function finishTrip(id) {
-            if(confirm("End this trip? History will be cleared.")) {
-                localStorage.setItem('pending_rating_id', id);
-                await db.ref('chats/' + id).remove();
-                localStorage.removeItem('booked_driver_id');
-                // The listener above will automatically trigger askForRating()
-            }
-        }
-
+        // Driver Info Logic
         function showDriverInfo(id) {
             db.ref('drivers/' + id).once('value').then(s => {
                 const d = s.val();
-                const profile = `Driver: ${d.name}\nPhone: ${d.phone || 'N/A'}\nRating: ⭐ ${d.rating || 'New'}\nTrips: ${d.total_trips || '0'}`;
-                if(confirm(profile + "\n\nContact via WhatsApp?")) {
-                    if(d.phone) window.open(`https://wa.me/6${d.phone}`, '_blank');
-                    else alert("No phone number found.");
-                }
+                document.getElementById('infoBody').innerHTML = `
+                    <div class="info-row"><span>Name</span><span style="font-weight:bold">${d.name}</span></div>
+                    <div class="info-row"><span>Rating</span><span>⭐ ${d.rating || 'New'}</span></div>
+                    <div class="info-row"><span>Car</span><span>${d.car}</span></div>
+                    <div class="info-row"><span>Plate</span><span>${d.plate}</span></div>
+                    <a href="https://wa.me/6${d.phone}" target="_blank" class="wa-btn">Contact via WhatsApp</a>
+                `;
+                document.getElementById('infoModal').style.display = 'flex';
             });
         }
 
-        function askForRating(driverId) {
-            currentRatingDriverId = driverId;
+        // Rating System (Google Style)
+        function askForRating(id) {
+            currentRatingDriverId = id;
+            db.ref('drivers/' + id).once('value').then(s => {
+                const d = s.val();
+                if(d) {
+                    document.getElementById('rateDriverName').innerText = d.name;
+                    document.getElementById('driverInitial').innerText = d.name.charAt(0).toUpperCase();
+                }
+            });
             document.getElementById('ratingModal').style.display = 'flex';
         }
 
         function setRating(n) {
             selectedStars = n;
             const stars = document.querySelectorAll('.star-btn');
-            stars.forEach((s, i) => {
-                s.classList.toggle('active', i < n);
-            });
+            stars.forEach((s, i) => s.classList.toggle('active', i < n));
         }
 
         async function submitRating() {
-            if(selectedStars === 0) return alert("Please select a rating!");
+            if(selectedStars === 0) return alert("Please select a star rating!");
             const feedback = document.getElementById('feedbackText').value;
             await db.ref('ratings/' + currentRatingDriverId).push({
                 stars: selectedStars,
                 message: feedback,
                 time: Date.now()
             });
-            alert("Thank you for your feedback!");
-            document.getElementById('ratingModal').style.display = 'none';
-            location.reload();
+            alert("Review posted successfully!");
+            closeModal('ratingModal');
+        }
+
+        async function finishTrip(id) {
+            if(confirm("End trip and clear chat?")) {
+                localStorage.setItem('pending_rating_id', id);
+                await db.ref('chats/' + id).remove();
+                localStorage.removeItem('booked_driver_id');
+            }
+        }
+
+        function closeModal(mId) {
+            document.getElementById(mId).style.display = 'none';
+            if(mId === 'ratingModal') location.reload();
         }
     </script>
 </body>
