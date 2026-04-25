@@ -342,50 +342,54 @@
                 const data = snap.val();
                 localStorage.setItem('sego_user', JSON.stringify({id: id, name: data.name}));
                 location.reload();
-            } else { alert("ID not found. Please register first!"); }
+            } else { 
+                alert("ID not found. If you are a Driver, please wait for admin approval. If Rider, please register first!"); 
+            }
         }
 
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
         
-      async function submitDriverApp() {
-    try {
-        const name = document.getElementById('dRegName').value.trim().toUpperCase();
-        const user = document.getElementById('dRegUser').value.trim();
-        const pass = document.getElementById('dRegPass').value.trim();
-        const car = document.getElementById('dRegCar').value.trim();
-        const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
-        
-        // --- CHECKPOINT: Ambil value phone ---
-        const phoneElem = document.getElementById('dRegPhone');
-        const phone = phoneElem ? phoneElem.value.trim() : "";
+        async function submitDriverApp() {
+            try {
+                const name = document.getElementById('dRegName').value.trim().toUpperCase();
+                const user = document.getElementById('dRegUser').value.trim().toLowerCase();
+                const stuID = document.getElementById('dRegStuID').value.trim();
+                const pass = document.getElementById('dRegPass').value.trim();
+                const car = document.getElementById('dRegCar').value.trim();
+                const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
+                const phone = document.getElementById('dRegPhone').value.trim();
 
-        // Debug: Tengok kat Console (F12) data apa yang dia nampak
-        console.log("Data input:", { name, user, pass, car, plate, phone });
+                if(!name || !user || !stuID || pass.length < 6 || !car || !plate || !phone) {
+                    return alert("Please fill ALL details! (Password min 6 chars)");
+                }
 
-        if(!name || !user || pass.length < 6 || !car || !plate || !phone) {
-            return alert("Sila isi SEMUA maklumat! (Termasuk No Telefon)");
+                const checkPending = await db.ref('driver_pending/' + user).get();
+                if (checkPending.exists()) {
+                    return alert("This username is already in process. Please wait.");
+                }
+
+                await db.ref('driver_pending/' + user).set({
+                    name: name,
+                    username: user,
+                    student_id: stuID,
+                    password: pass,
+                    car: car,
+                    plate: plate,
+                    phone: String(phone),
+                    status: 'PENDING',
+                    appliedAt: Date.now()
+                });
+
+                alert("Application Sent! Please wait for admin approval.");
+                closeDriverReg();
+                document.querySelectorAll('#driverRegOverlay input').forEach(i => i.value = '');
+                
+            } catch (e) {
+                console.error("Error:", e);
+                alert("System Error: " + e.message);
+            }
         }
-
-        // Hantar ke Firebase
-        await db.ref('driver_pending/' + user).set({
-            name: name,
-            username: user,
-            password: pass,
-            car: car,
-            plate: plate,
-            phone: String(phone), // Paksa string supaya tak hilang '0'
-            appliedAt: Date.now()
-        });
-
-        alert("Application Sent!");
-        closeDriverReg();
-        
-    } catch (e) {
-        console.error("Error:", e);
-        alert("System Error: " + e.message);
-    }
-}    
 
         function openGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'flex'; }
         function closeGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'none'; }
@@ -433,10 +437,7 @@
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             
             if(s === 'ACCEPTED' && data) {
-                // Logik untuk Driver ID: Kalau driver_id asal diletak (cth: d001), kita besarkan.
-                // Kalau driver_id tu username (cth: ali), kita paparkan username tu.
                 const displayID = data.driver_id ? data.driver_id.toUpperCase() : "N/A";
-
                 area.innerHTML = `
                 <div class="card" style="border-left:4px solid var(--green)">
                     <h4>Driver Found</h4>
@@ -448,18 +449,13 @@
             }
         }
 
-        // --- INI FUNGSI YANG HILANG TADI ---
         async function finishTripManual() {
-            if(confirm("Dah sampai ke destinasi? Tekan OK untuk beri rating.")) {
+            if(confirm("Arrived at destination? Click OK to rate.")) {
                 try {
-                    // Update status dalam Firebase supaya Driver pun tahu trip dah tamat
-                    await db.ref('open_requests/' + activeReqId).update({
-                        status: 'COMPLETED'
-                    });
-                    // Bila status jadi COMPLETED, function listenToRequest() akan auto-trigger rating modal
+                    await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' });
                 } catch (e) {
                     console.error(e);
-                    alert("Gagal menamatkan trip. Cuba lagi.");
+                    alert("Failed to complete trip.");
                 }
             }
         }   
