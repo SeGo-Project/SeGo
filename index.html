@@ -350,6 +350,7 @@
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
         
+        // --- REPAIRED FUNCTION START ---
         async function submitDriverApp() {
             const name = document.getElementById('dRegName').value.trim().toUpperCase();
             const user = document.getElementById('dRegUser').value.trim();
@@ -363,20 +364,31 @@
                 return alert("Sila isi semua maklumat dengan betul!");
             }
 
+            // Simpan guna standard variable name: 'student_id' dan 'phone'
             await db.ref('driver_pending/' + user).set({
                 name: name,
                 username: user,
-                studentID: stuID,
+                student_id: stuID, 
                 password: pass,
                 car: car,
                 plate: plate,
-                phone: phone,
+                phone: phone, 
                 appliedAt: Date.now()
             });
             
             alert("Application Sent! Sila tunggu admin hubungi anda untuk pengesahan.");
             closeDriverReg();
+            
+            // Clear fields
+            document.getElementById('dRegName').value = "";
+            document.getElementById('dRegUser').value = "";
+            document.getElementById('dRegStuID').value = "";
+            document.getElementById('dRegPass').value = "";
+            document.getElementById('dRegCar').value = "";
+            document.getElementById('dRegPlate').value = "";
+            document.getElementById('dRegPhone').value = "";
         }
+        // --- REPAIRED FUNCTION END ---
 
         function openGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'flex'; }
         function closeGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'none'; }
