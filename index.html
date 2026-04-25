@@ -44,9 +44,20 @@
         <div id="loginArea">
             <h1 style="text-align: center;">🚗 SeGo</h1>
             <div class="card">
-                <input type="text" id="stuID" class="input-field" placeholder="Student ID">
-                <input type="text" id="stuName" class="input-field" placeholder="Full Name">
+                <input type="text" id="stuID" class="input-field" placeholder="Student ID (e.g. 2023xxxxxx)">
                 <button class="btn" onclick="login()">Login</button>
+                <p style="text-align:center; font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="toggleAuth()">New here? Register Account</p>
+            </div>
+        </div>
+
+        <div id="registerArea" style="display: none;">
+            <h1 style="text-align: center;">Register SeGo</h1>
+            <div class="card">
+                <input type="text" id="regID" class="input-field" placeholder="Student ID (10 Digits)">
+                <input type="text" id="regName" class="input-field" placeholder="Full Name">
+                <input type="text" id="regPhone" class="input-field" placeholder="Phone Number">
+                <button class="btn" style="background: var(--green);" onclick="register()">Create Account</button>
+                <p style="text-align:center; font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="toggleAuth()">Already have account? Login</p>
             </div>
         </div>
 
@@ -169,17 +180,50 @@
             loadMyBookings();
         }
 
+        // --- AUTH LOGIC ---
+        function toggleAuth() {
+            const login = document.getElementById('loginArea');
+            const register = document.getElementById('registerArea');
+            if(login.style.display === 'none') { login.style.display = 'block'; register.style.display = 'none'; }
+            else { login.style.display = 'none'; register.style.display = 'block'; }
+        }
+
+        async function register() {
+            const id = document.getElementById('regID').value.trim();
+            const name = document.getElementById('regName').value.trim().toUpperCase();
+            const phone = document.getElementById('regPhone').value.trim();
+
+            if(id.length < 5 || name.length < 3) return alert("Please fill all details correctly!");
+
+            const check = await db.ref('students/' + id).get();
+            if(check.exists()) return alert("This ID is already registered!");
+
+            await db.ref('students/' + id).set({ name: name, phone: phone });
+            alert("Registration Successful! Now you can Login.");
+            toggleAuth();
+        }
+
+        async function login() {
+            const id = document.getElementById('stuID').value.trim();
+            if(!id) return alert("Enter Student ID");
+
+            const snap = await db.ref('students/' + id).get();
+            if(snap.exists()) {
+                const data = snap.val();
+                localStorage.setItem('sego_user', JSON.stringify({id: id, name: data.name}));
+                location.reload();
+            } else {
+                alert("ID not found. Please register first!");
+            }
+        }
+
+        // --- CORE APP LOGIC ---
         function setPax(n) {
             selectedPax = n;
             document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('pax'+n).classList.add('active');
         }
 
-        function login() {
-            const id = document.getElementById('stuID').value;
-            const name = document.getElementById('stuName').value;
-            if(id && name) { localStorage.setItem('sego_user', JSON.stringify({id, name})); location.reload(); }
-        }
         function logout() { localStorage.clear(); location.reload(); }
         function showTab(t) {
             document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none';
