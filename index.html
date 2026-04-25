@@ -50,23 +50,19 @@
         .pending { background: #475569; }
         .accepted { background: #22c55e; }
 
-        /* Floating Chat UI */
-        #chatPanel {
-            position: fixed; bottom: 0; left: 0; right: 0; top: 0;
-            background: var(--bg); z-index: 2000; display: none; flex-direction: column;
+        /* Modal / Panel */
+        #chatPanel, #ratingModal, #infoModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 3000; display: none; align-items: center; justify-content: center;
         }
-        .chat-header { background: var(--blue); padding: 20px; display: flex; align-items: center; gap: 15px; }
-        #chatMessages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .modal-box { background: var(--card); width: 85%; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--blue); }
+        
+        #chatPanel { flex-direction: column; background: var(--bg); }
+        .chat-header { background: var(--blue); padding: 20px; width: 100%; display: flex; align-items: center; box-sizing: border-box; }
+        #chatMessages { flex: 1; padding: 20px; width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
         .bubble { padding: 10px 15px; border-radius: 15px; max-width: 75%; }
         .bubble.me { align-self: flex-end; background: var(--blue); }
         .bubble.them { align-self: flex-start; background: #334155; }
-
-        /* Custom Modal Info */
-        #infoModal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 3000;
-        }
-        .modal-content { background: var(--card); width: 85%; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--blue); }
     </style>
 </head>
 <body>
@@ -111,25 +107,40 @@
     </div>
 
     <div id="infoModal">
-        <div class="modal-content">
-            <div style="font-size: 3rem; margin-bottom: 10px;">👤</div>
-            <h2 id="modalName" style="margin: 0;"></h2>
-            <p id="modalID" style="color: var(--slate); margin: 5px 0 20px 0;"></p>
+        <div class="modal-box">
+            <div style="font-size: 3rem;">👤</div>
+            <h2 id="modalName"></h2>
+            <p id="modalID" style="color: var(--slate);"></p>
             <div style="background: #0f172a; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
-                <small style="color: var(--slate);">DRIVER RATING</small>
-                <div style="font-size: 1.5rem; font-weight:bold; color:var(--amber);">⭐ <span id="modalRating"></span></div>
+                <div style="font-size: 1.5rem; color:var(--amber);">⭐ <span id="modalRating"></span></div>
             </div>
             <button class="btn" style="background:#334155" onclick="closeModal()">Close</button>
         </div>
     </div>
 
+    <div id="ratingModal">
+        <div class="modal-box">
+            <h2>Trip Completed!</h2>
+            <p>Rate your driver:</p>
+            <select id="rateValue" class="input-field" style="text-align: center; font-size: 1.2rem;">
+                <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                <option value="3">⭐⭐⭐ (3/5)</option>
+                <option value="2">⭐⭐ (2/5)</option>
+                <option value="1">⭐ (1/5)</option>
+            </select>
+            <input type="text" id="rateFeedback" class="input-field" placeholder="Any feedback?">
+            <button class="btn" onclick="submitRating()">Submit & Finish</button>
+        </div>
+    </div>
+
     <div id="chatPanel">
         <div class="chat-header">
-            <button onclick="closeChat()" style="background:none; border:none; color:white; font-size: 1.2rem; cursor:pointer;">← Back</button>
-            <b id="chatWith">Driver</b>
+            <button onclick="closeChat()" style="background:none; border:none; color:white; cursor:pointer;">← Back</button>
+            <b id="chatWith" style="margin-left:10px;">Driver</b>
         </div>
         <div id="chatMessages"></div>
-        <div style="padding: 15px; display: flex; gap: 10px; border-top: 1px solid #334155;">
+        <div style="padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
             <input type="text" id="chatInput" class="input-field" style="margin:0;" placeholder="Message...">
             <button onclick="sendMsg()" style="background:var(--blue); border:none; color:white; padding:0 15px; border-radius:10px;">Send</button>
         </div>
@@ -147,6 +158,27 @@
         let currentUser = JSON.parse(localStorage.getItem('sego_user'));
         let activeChatId = null;
 
+        // BAN LOGIC
+        function checkBanStatus() {
+            const until = localStorage.getItem('sego_banned_until');
+            if (until && Date.now() < until) {
+                const rem = Math.ceil((until - Date.now()) / 60000);
+                alert(`You are banned for ${rem} minutes.`);
+                return true;
+            }
+            return false;
+        }
+
+        function applyStrike() {
+            let strikes = parseInt(localStorage.getItem('cancel_count') || 0) + 1;
+            localStorage.setItem('cancel_count', strikes);
+            if (strikes >= 3) {
+                localStorage.setItem('sego_banned_until', Date.now() + 600000);
+                alert("BANNED! 3 cancellations detected.");
+            }
+        }
+
+        // AUTH
         function login() {
             const id = document.getElementById('stuID').value.trim();
             const name = document.getElementById('stuName').value.trim();
@@ -172,7 +204,6 @@
         }
 
         function syncData() {
-            // FIX UNDEFINED: Filter data betul-betul
             db.ref('drivers').on('value', snap => {
                 const drivers = snap.val();
                 let html = "";
@@ -183,19 +214,19 @@
                     
                     if(activeTrip) {
                         html = `<div class="card" style="border-left:5px solid var(--amber);">
-                            <h4>Ongoing Ride with ${activeTrip.name}</h4>
-                            <p>${activeTrip.car} [${activeTrip.plate}]</p>
-                            <button class="btn" onclick="openChatBox('${activeTrip.id}', '${activeTrip.name}')">CHAT DRIVER</button>
-                            <button class="btn" style="background:var(--red); margin-top:5px;" onclick="cancelInstant('${activeTrip.id}')">CANCEL</button>
+                            <h4>Trip with ${activeTrip.name}</h4>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <button class="btn" onclick="openChatBox('${activeTrip.id}', '${activeTrip.name}')">CHAT</button>
+                                <button class="btn" style="background:var(--amber); color:black;" onclick="finishTripModal('${activeTrip.id}')">COMPLETE RIDE</button>
+                                <button class="btn" style="background:var(--red);" onclick="cancelInstant('${activeTrip.id}')">CANCEL</button>
+                            </div>
                         </div>`;
                     } else {
                         localStorage.removeItem('booked_driver_id');
                         Object.values(drivers).forEach(d => {
-                            // Cek jika driver wujud dan status ON
                             if(d && d.name && d.status === "ON") {
                                 html += `<div class="card">
-                                    <div style="font-weight:bold;">${d.name}</div>
-                                    <div style="color:var(--slate); font-size:0.8rem;">${d.car} • ${d.plate}</div>
+                                    <b>${d.name}</b><br><small>${d.car} • ${d.plate}</small>
                                     <div style="display:flex; gap:10px; margin-top:15px;">
                                         <button class="btn" onclick="bookInstant('${d.id}')">BOOK NOW</button>
                                         <button class="btn" style="background:#475569" onclick="showInfo('${d.id}')">INFO</button>
@@ -231,13 +262,13 @@
             });
         }
 
-        // INFO (Hanya Nama, ID, Rating)
+        // ACTIONS
         async function showInfo(id) {
             const s = await db.ref('drivers/' + id).get();
             if(s.exists()) {
                 const d = s.val();
                 document.getElementById('modalName').innerText = d.name;
-                document.getElementById('modalID').innerText = "ID: " + (d.id_student || d.id); // Tunjuk Student ID Driver
+                document.getElementById('modalID').innerText = "ID: " + (d.id_student || "N/A");
                 document.getElementById('modalRating').innerText = d.rating || '5.0';
                 document.getElementById('infoModal').style.display = 'flex';
             }
@@ -245,35 +276,51 @@
         function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
 
         async function bookInstant(id) {
-            if(!confirm("Book driver?")) return;
+            if(checkBanStatus()) return;
+            if(!confirm("Book now?")) return;
             localStorage.setItem('booked_driver_id', id);
             await db.ref('drivers/' + id).update({ status: 'BOOKED' });
         }
 
-        async function submitBooking() {
-            const date = document.getElementById('bookDate').value;
-            const time = document.getElementById('bookTime').value;
-            const dest = document.getElementById('bookDest').value;
-            if(!date || !time || !dest) return alert("Fill all fields");
-            await db.ref('bookings').push({
-                student_id: currentUser.id, student_name: currentUser.name,
-                date, time, dest, status: 'PENDING'
+        // FINISH TRIP LOGIC
+        let pendingFinishId = null;
+        function finishTripModal(id) {
+            pendingFinishId = id;
+            document.getElementById('ratingModal').style.display = 'flex';
+        }
+
+        async function submitRating() {
+            const rate = document.getElementById('rateValue').value;
+            const feedback = document.getElementById('rateFeedback').value;
+            
+            // Simpan feedback ke Driver node (optional)
+            await db.ref('drivers/' + pendingFinishId + '/feedbacks').push({
+                student: currentUser.name,
+                rating: rate,
+                comment: feedback,
+                date: Date.now()
             });
-            alert("Booking Sent!");
+
+            // Reset Driver Status
+            await db.ref('drivers/' + pendingFinishId).update({ status: 'ON' });
+            await db.ref('chats/' + pendingFinishId).remove();
+            localStorage.removeItem('booked_driver_id');
+            
+            document.getElementById('ratingModal').style.display = 'none';
+            alert("Thank you for your feedback!");
+            pendingFinishId = null;
         }
 
         async function cancelInstant(id) {
-            if(confirm("Cancel?")) {
+            if(confirm("Cancel ride? Strike added.")) {
+                applyStrike();
                 await db.ref('drivers/' + id).update({ status: 'ON' });
                 await db.ref('chats/' + id).remove();
                 localStorage.removeItem('booked_driver_id');
             }
         }
 
-        async function cancelPreBook(bid) {
-            if(confirm("Cancel booking?")) await db.ref('bookings/' + bid).remove();
-        }
-
+        // CHAT
         function openChatBox(id, name) {
             activeChatId = id;
             document.getElementById('chatWith').innerText = name;
@@ -289,9 +336,7 @@
                 box.scrollTop = box.scrollHeight;
             });
         }
-
         function closeChat() { document.getElementById('chatPanel').style.display = 'none'; }
-
         function sendMsg() {
             const input = document.getElementById('chatInput');
             if(!input.value.trim() || !activeChatId) return;
