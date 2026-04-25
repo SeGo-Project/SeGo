@@ -55,13 +55,9 @@
             box-sizing: border-box; 
             font-family: inherit;
         }
-        .input-field:focus {
-            outline: none;
-            border-color: var(--blue);
-        }
+        .input-field:focus { outline: none; border-color: var(--blue); }
         
         #regName, #dRegName { text-transform: uppercase; }
-        
         label { font-size: 0.8rem; font-weight: 500; color: var(--slate); margin-top: 8px; display: block; }
         
         .btn { 
@@ -79,7 +75,7 @@
         }
         .btn:active { transform: scale(0.98); }
 
-        /* Overlay Driver Registration */
+        /* Driver Registration Overlay */
         #driverRegOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:20000; display:none; flex-direction:column; padding:20px; box-sizing:border-box; overflow-y:auto; }
 
         .tab-bar { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; background: #1e293b; padding: 6px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; }
@@ -90,7 +86,7 @@
         .pax-btn.active { background: rgba(37, 99, 235, 0.1); border-color: var(--blue); color: var(--blue); }
 
         #infoModal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(4px); }
-        .modal-content { background: var(--card); width: 85%; max-width: 350px; padding: 25px; border-radius: 10px; border: 1px solid var(--border); text-align: left; }
+        .modal-content { background: var(--card); width: 85%; max-width: 380px; padding: 30px; border-radius: 16px; border: 1px solid var(--border); text-align: left; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 0.95rem; }
         .plate-box { background: #000; color: #fff; padding: 10px 15px; border-radius: 4px; font-weight: 600; font-family: monospace; font-size: 1.2rem; border: 1px solid var(--border); text-align: center; }
 
@@ -103,7 +99,16 @@
         .bubble.me { align-self: flex-end; background: var(--blue); }
         .bubble.them { align-self: flex-start; background: #334155; }
         
-        #ratingModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; }
+        /* Modals for Rating & Feedback */
+        #ratingModal, #generalFeedbackModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        
+        /* Star Rating System */
+        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-direction: row-reverse; }
+        .stars input { display: none; }
+        .stars label { font-size: 35px; color: #334155; cursor: pointer; transition: 0.2s; }
+        .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: var(--amber); }
+        textarea { width: 100%; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: white; padding: 15px; box-sizing: border-box; resize: none; font-family: inherit; margin-bottom: 20px; }
+        textarea:focus { outline: none; border-color: var(--blue); }
     </style>
 </head>
 <body>
@@ -121,6 +126,9 @@
             </div>
             <p style="text-align:center; margin-top:20px; font-size:0.85rem; color:var(--slate);">
                 Want to earn extra? <span onclick="openDriverReg()" style="color:var(--white); cursor:pointer; font-weight:600; text-decoration:underline;">Register as Driver</span>
+            </p>
+            <p style="text-align:center; margin-top:10px; font-size:0.85rem; color:var(--slate);">
+                Have a review? <span onclick="openGeneralFeedback()" style="color:var(--amber); cursor:pointer; font-weight:600;">Submit Feedback</span>
             </p>
         </div>
 
@@ -234,6 +242,39 @@
         </div>
     </div>
 
+    <div id="generalFeedbackModal">
+        <div class="modal-content" style="text-align: center;">
+            <h2 style="margin: 0 0 10px 0;">App Feedback</h2>
+            <p style="color: var(--slate); font-size: 0.9rem;">Help us improve SeGo by sharing your experience or reporting an issue.</p>
+            <div class="stars">
+                <input type="radio" id="g5" name="g_rating" value="5"><label for="g5">★</label>
+                <input type="radio" id="g4" name="g_rating" value="4"><label for="g4">★</label>
+                <input type="radio" id="g3" name="g_rating" value="3"><label for="g3">★</label>
+                <input type="radio" id="g2" name="g_rating" value="2"><label for="g2">★</label>
+                <input type="radio" id="g1" name="g_rating" value="1"><label for="g1">★</label>
+            </div>
+            <textarea id="g_comment" rows="4" placeholder="Your feedback..."></textarea>
+            <button class="btn" onclick="submitGeneralFeedback()">Submit Feedback</button>
+            <button class="btn" style="background:transparent; color:var(--slate); border:1px solid var(--border);" onclick="closeGeneralFeedback()">Cancel</button>
+        </div>
+    </div>
+
+    <div id="ratingModal">
+        <div class="modal-content" style="text-align: center;">
+            <h2 style="margin: 0 0 10px 0;">Trip Completed</h2>
+            <p style="color: var(--slate); font-size: 0.9rem;">Rate your driver to keep the SeGo community reliable.</p>
+            <div class="stars">
+                <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
+                <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
+                <input type="radio" id="s3" name="rating" value="3"><label for="s3">★</label>
+                <input type="radio" id="s2" name="rating" value="2"><label for="s2">★</label>
+                <input type="radio" id="s1" name="rating" value="1"><label for="s1">★</label>
+            </div>
+            <textarea id="rateFeedback" rows="3" placeholder="Anything to add? (Optional)"></textarea>
+            <button class="btn" onclick="submitTripRating()">Submit Review</button>
+        </div>
+    </div>
+
     <div id="infoModal">
         <div class="modal-content">
             <h3 style="margin-bottom:20px;">Driver Information</h3>
@@ -257,23 +298,6 @@
         <div style="padding:15px; display:flex; gap:10px; background:var(--card); border-top: 1px solid var(--border);">
             <input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type message...">
             <button class="btn" style="width:80px; margin:0;" onclick="sendChatMsg()">Send</button>
-        </div>
-    </div>
-
-    <div id="ratingModal">
-        <div class="card" style="text-align: center; width: 85%; max-width: 350px;">
-            <h3 style="margin-bottom:20px;">Trip Completed</h3>
-            <label style="text-align:left;">Rate your experience</label>
-            <select id="rateValue" class="input-field">
-                <option value="5">5 Stars - Excellent</option>
-                <option value="4">4 Stars - Good</option>
-                <option value="3">3 Stars - Average</option>
-                <option value="2">2 Stars - Poor</option>
-                <option value="1">1 Star - Terrible</option>
-            </select>
-            <label style="text-align:left;">Feedback</label>
-            <input type="text" id="rateFeedback" class="input-field" placeholder="Optional comments">
-            <button class="btn" style="margin-top:20px;" onclick="submitRating()">Submit</button>
         </div>
     </div>
 
@@ -346,6 +370,28 @@
             closeDriverReg();
         }
 
+        // --- GENERAL FEEDBACK LOGIC ---
+        function openGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'flex'; }
+        function closeGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'none'; }
+        async function submitGeneralFeedback() {
+            const rating = document.querySelector('input[name="g_rating"]:checked')?.value;
+            const comment = document.getElementById('g_comment').value.trim();
+            
+            if(!rating) return alert("Please select a star rating");
+
+            await db.ref('feedbacks/app_general').push({
+                student_name: currentUser ? currentUser.name : "Anonymous",
+                rating: rating,
+                comment: comment,
+                timestamp: Date.now()
+            });
+
+            alert("Thank you! Your feedback has been submitted.");
+            closeGeneralFeedback();
+            document.getElementById('g_comment').value = '';
+            document.querySelector('input[name="g_rating"]:checked').checked = false;
+        }
+
         // --- CORE FUNCTIONS ---
         function setPax(n) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active')); document.getElementById('pax'+n).classList.add('active'); }
         function logout() { localStorage.clear(); location.reload(); }
@@ -397,11 +443,25 @@
             document.getElementById('infoModal').style.display = 'flex';
         }
 
-        async function submitRating() {
+        async function submitTripRating() {
+            const rating = document.querySelector('input[name="rating"]:checked')?.value;
+            const comment = document.getElementById('rateFeedback').value.trim();
             const drvId = localStorage.getItem('pending_rating_id');
-            if(drvId) { await db.ref('drivers/' + drvId + '/feedbacks').push({ rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, student: currentUser.name, date: new Date().toLocaleDateString() }); }
+
+            if(!rating) return alert("Please select a star rating");
+
+            if(drvId) { 
+                await db.ref('feedbacks/' + drvId).push({ 
+                    student_name: currentUser.name, 
+                    rating: rating, 
+                    comment: comment, 
+                    timestamp: Date.now() 
+                }); 
+            }
             if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); await db.ref('chats/' + activeReqId).remove(); }
+            
             localStorage.removeItem('active_request_id');
+            localStorage.removeItem('pending_rating_id');
             location.reload();
         }
 
@@ -450,6 +510,3 @@
                 document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:var(--slate); font-size:0.9rem;'>No bookings yet.</p>";
             });
         }
-    </script>
-</body>
-</html>
