@@ -195,7 +195,6 @@
             return (main === 'Others') ? document.getElementById(id + 'Other').value : main;
         }
 
-        // LOGIC INSTANT
         async function findDriver() {
             const p = getVal('insPick'); const d = getVal('insDest');
             if(!p || !d) return alert("Select locations");
@@ -232,15 +231,17 @@
             const activeArea = document.getElementById('activeTripState');
             activeArea.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             if(s === 'ACCEPTED' && data) {
-                activeArea.innerHTML = `<div class="card" style="border-left:5px solid var(--green)">
-                    <h4>Driver Found!</h4><p><b>${data.driver_name}</b> (${data.driver_car})</p>
-                    <button class="btn" onclick="openChatBox('${activeReqId}', '${data.driver_name}')">CHAT DRIVER</button>
-                    <button class="btn" style="background:var(--amber); color:black;" onclick="finishTripManual()">FINISH TRIP</button>
+                activeArea.innerHTML = `
+                <div class="card" style="border-left:5px solid var(--green)">
+                    <h4>Driver Found!</h4>
+                    <p><b>${data.driver_name}</b> is on the way.</p>
+                    <button class="btn" style="background:#475569; margin-bottom:5px;" onclick="alert('DRIVER DETAILS\\nName: ${data.driver_name}\\nStudent ID: ${data.driver_id}\\nCar: ${data.driver_car}')">ℹ️ VIEW DRIVER INFO</button>
+                    <button class="btn" onclick="openChatBox('${activeReqId}', '${data.driver_name}')">💬 CHAT DRIVER</button>
+                    <button class="btn" style="background:var(--amber); color:black;" onclick="finishTripManual()">✅ FINISH TRIP</button>
                 </div>`;
             }
         }
 
-        // LOGIC PRE-BOOKING
         async function submitBooking() {
             const date = document.getElementById('bookDate').value;
             const time = document.getElementById('bookTime').value;
@@ -249,11 +250,7 @@
             await db.ref('bookings').push({ 
                 student_id: currentUser.id, 
                 student_name: currentUser.name, 
-                date, 
-                time, 
-                pickup: p, 
-                dest: d, 
-                status: 'PENDING' 
+                date, time, pickup: p, dest: d, status: 'PENDING' 
             });
             alert("Booking Posted!");
         }
@@ -297,7 +294,10 @@
         async function submitRating() {
             const drvId = localStorage.getItem('pending_rating_id');
             if(drvId) { await db.ref('drivers/' + drvId + '/feedbacks').push({ rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, student: currentUser.name }); }
-            if(activeReqId) await db.ref('open_requests/' + activeReqId).remove();
+            if(activeReqId) {
+                await db.ref('open_requests/' + activeReqId).remove();
+                await db.ref('chats/' + activeReqId).remove();
+            }
             localStorage.removeItem('active_request_id'); localStorage.removeItem('pending_rating_id');
             location.reload();
         }
