@@ -7,61 +7,23 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { 
-            --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; 
-            --amber: #fbbc04; --red: #ef4444; --slate: #94a3b8; --white: #ffffff;
-        }
-
-        body { 
-            font-family: 'Segoe UI', sans-serif; background: var(--bg); 
-            color: var(--white); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; 
-        }
-
+        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #fbbc04; --red: #ef4444; --slate: #94a3b8; --white: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; }
-
-        .card { 
-            background: var(--card); padding: 20px; border-radius: 15px; 
-            margin-bottom: 15px; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .input-field { 
-            width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; 
-            border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; 
-        }
-
-        /* Pax Selector */
+        .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #334155; }
+        .input-field { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
         .pax-container { display: flex; justify-content: space-around; margin: 15px 0; }
-        .pax-btn {
-            width: 45px; height: 45px; border-radius: 50%; border: 2px solid #334155;
-            background: transparent; color: white; cursor: pointer; font-weight: bold;
-        }
+        .pax-btn { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #334155; background: transparent; color: white; cursor: pointer; }
         .pax-btn.active { background: var(--blue); border-color: var(--blue); }
-
-        .btn { 
-            width: 100%; padding: 14px; background: var(--blue); color: white; 
-            border: none; border-radius: 12px; cursor: pointer; font-weight: bold;
-        }
-
-        /* Searching Anim */
-        .loader {
-            border: 4px solid #334155; border-top: 4px solid var(--blue);
-            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
+        .btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .loader { border: 4px solid #334155; border-top: 4px solid var(--blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Modals */
-        #ratingModal, #chatPanel {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center;
-        }
+        #ratingModal, #chatPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; }
         .modal-box { background: var(--card); width: 85%; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--blue); }
-        
         #chatPanel { flex-direction: column; background: var(--bg); align-items: stretch; justify-content: flex-start; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <div id="loginArea">
             <h1 style="text-align: center;">🚗 SeGo</h1>
@@ -79,10 +41,28 @@
             </div>
 
             <div id="requestForm" class="card">
-                <h4 style="margin:0">Request Instant Ride</h4>
-                <input type="text" id="pickupLoc" class="input-field" placeholder="Pickup Location">
-                <input type="text" id="dropLoc" class="input-field" placeholder="Destination">
-                <p style="font-size:0.8rem; color:var(--slate); margin:10px 0 5px 0;">How many pax?</p>
+                <h4 style="margin:0">Where to?</h4>
+                <p style="font-size:0.8rem; color:var(--slate); margin:10px 0 5px 0;">Pickup:</p>
+                <select id="pickupSelect" class="input-field" onchange="toggleOthers('pickup')">
+                    <option value="US Sentral">US Sentral</option>
+                    <option value="UiTM">UiTM</option>
+                    <option value="OS Sentral">OS Sentral</option>
+                    <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                    <option value="Others">Others</option>
+                </select>
+                <input type="text" id="pickupOthers" class="input-field" style="display:none;" placeholder="Type pickup location">
+
+                <p style="font-size:0.8rem; color:var(--slate); margin:10px 0 5px 0;">Destination:</p>
+                <select id="dropSelect" class="input-field" onchange="toggleOthers('drop')">
+                    <option value="UiTM">UiTM</option>
+                    <option value="US Sentral">US Sentral</option>
+                    <option value="OS Sentral">OS Sentral</option>
+                    <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                    <option value="Others">Others</option>
+                </select>
+                <input type="text" id="dropOthers" class="input-field" style="display:none;" placeholder="Type destination">
+
+                <p style="font-size:0.8rem; color:var(--slate); margin:10px 0 5px 0;">Pax:</p>
                 <div class="pax-container">
                     <button class="pax-btn active" onclick="setPax(1, this)">1</button>
                     <button class="pax-btn" onclick="setPax(2, this)">2</button>
@@ -95,7 +75,7 @@
             <div id="searchingState" class="card" style="display: none; text-align: center;">
                 <div class="loader"></div>
                 <h3>Searching for Driver...</h3>
-                <button class="btn" style="background:var(--red); margin-top:10px;" onclick="cancelRequest()">CANCEL</button>
+                <button class="btn" style="background:var(--red);" onclick="cancelRequest()">CANCEL</button>
             </div>
 
             <div id="activeTripState" style="display: none;"></div>
@@ -104,13 +84,9 @@
 
     <div id="ratingModal">
         <div class="modal-box">
-            <h2>Trip Ended!</h2>
+            <h2>Trip Completed!</h2>
             <p>Rate your driver:</p>
-            <select id="rateValue" class="input-field">
-                <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                <option value="3">⭐⭐⭐ (3/5)</option>
-            </select>
+            <select id="rateValue" class="input-field"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option></select>
             <input type="text" id="rateFeedback" class="input-field" placeholder="Feedback...">
             <button class="btn" onclick="submitRating()">Submit</button>
         </div>
@@ -122,24 +98,17 @@
             <b style="margin-left:15px;" id="chatWith">Driver</b>
         </div>
         <div id="chatMessages" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
-        <div style="padding:15px; display:flex; gap:10px;">
-            <input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type...">
-            <button class="btn" style="width:80px" onclick="sendMsg()">Send</button>
-        </div>
+        <div style="padding:15px; display:flex; gap:10px;"><input type="text" id="chatInput" class="input-field" style="margin:0"><button class="btn" style="width:80px" onclick="sendMsg()">Send</button></div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg",
-            databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "carpool-uitm"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg", databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "carpool-uitm" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentUser = JSON.parse(localStorage.getItem('sego_user'));
         let selectedPax = 1;
-        let activeRequestId = localStorage.getItem('active_request_id');
+        let activeReqId = localStorage.getItem('active_request_id');
 
         function login() {
             const id = document.getElementById('stuID').value.trim();
@@ -158,148 +127,71 @@
             listenToRequest();
         }
 
-        function setPax(num, btn) {
-            selectedPax = num;
-            document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
+        function setPax(n, b) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); }
+        function toggleOthers(t) { document.getElementById(t+'Others').style.display = document.getElementById(t+'Select').value === 'Others' ? 'block' : 'none'; }
 
         async function findDriver() {
-            const pickup = document.getElementById('pickupLoc').value.trim();
-            const drop = document.getElementById('dropLoc').value.trim();
-            if(!pickup || !drop) return alert("Fill locations!");
-
+            const p = document.getElementById('pickupSelect').value === 'Others' ? document.getElementById('pickupOthers').value : document.getElementById('pickupSelect').value;
+            const d = document.getElementById('dropSelect').value === 'Others' ? document.getElementById('dropOthers').value : document.getElementById('dropSelect').value;
+            if(!p || !d) return alert("Fill locations");
             const newReq = db.ref('open_requests').push();
-            activeRequestId = newReq.key;
-            localStorage.setItem('active_request_id', activeRequestId);
-
-            await newReq.set({
-                student_id: currentUser.id,
-                student_name: currentUser.name,
-                pickup, destination: drop,
-                pax: selectedPax,
-                status: 'SEARCHING',
-                timestamp: Date.now()
-            });
+            activeReqId = newReq.key;
+            localStorage.setItem('active_request_id', activeReqId);
+            await newReq.set({ student_id: currentUser.id, student_name: currentUser.name, pickup: p, destination: d, pax: selectedPax, status: 'SEARCHING', timestamp: Date.now() });
             listenToRequest();
         }
 
-        // --- LIVE LISTENER (NO REFRESH NEEDED) ---
         function listenToRequest() {
-            if(!activeRequestId) {
-                updateUI('IDLE');
-                return;
-            }
-
-            db.ref('open_requests/' + activeRequestId).on('value', snap => {
+            if(!activeReqId) return updateUI('IDLE');
+            db.ref('open_requests/' + activeReqId).on('value', snap => {
                 const data = snap.val();
-                
                 if(!data) {
-                    // Jika data hilang tapi ada pending rating
-                    if(localStorage.getItem('pending_rating_id')) {
-                        document.getElementById('ratingModal').style.display = 'flex';
-                    } else {
-                        updateUI('IDLE');
-                        localStorage.removeItem('active_request_id');
-                    }
+                    if(localStorage.getItem('pending_rating_id')) document.getElementById('ratingModal').style.display = 'flex';
+                    else { updateUI('IDLE'); localStorage.removeItem('active_request_id'); }
                     return;
                 }
-
-                if(data.status === 'ACCEPTED') {
-                    updateUI('ACCEPTED', data);
-                } else if(data.status === 'COMPLETED') {
-                    // Driver tamatkan trip
+                if(data.status === 'ACCEPTED') updateUI('ACCEPTED', data);
+                else if(data.status === 'COMPLETED') {
                     localStorage.setItem('pending_rating_id', data.driver_id);
                     localStorage.removeItem('active_request_id');
-                    db.ref('open_requests/' + activeRequestId).remove();
-                } else {
-                    updateUI('SEARCHING');
-                }
+                    db.ref('open_requests/' + activeReqId).remove();
+                } else updateUI('SEARCHING');
             });
         }
 
-        function updateUI(state, data = null) {
-            const form = document.getElementById('requestForm');
-            const search = document.getElementById('searchingState');
+        function updateUI(s, data = null) {
+            document.getElementById('requestForm').style.display = s === 'IDLE' ? 'block' : 'none';
+            document.getElementById('searchingState').style.display = s === 'SEARCHING' ? 'block' : 'none';
             const active = document.getElementById('activeTripState');
-
-            form.style.display = state === 'IDLE' ? 'block' : 'none';
-            search.style.display = state === 'SEARCHING' ? 'block' : 'none';
-            active.style.display = state === 'ACCEPTED' ? 'block' : 'none';
-
-            if(state === 'ACCEPTED' && data) {
-                active.innerHTML = `
-                    <div class="card" style="border-left:5px solid var(--blue)">
-                        <h3>Driver: ${data.driver_name}</h3>
-                        <p>${data.driver_car} [${data.driver_plate}]</p>
-                        <div style="display:flex; gap:10px; margin-top:15px;">
-                            <button class="btn" onclick="openChatBox('${activeRequestId}', '${data.driver_name}')">CHAT</button>
-                            <button class="btn" style="background:var(--amber); color:black;" onclick="finishTrip()">FINISH</button>
-                        </div>
-                    </div>`;
+            active.style.display = s === 'ACCEPTED' ? 'block' : 'none';
+            if(s === 'ACCEPTED' && data) {
+                active.innerHTML = `<div class="card" style="border-left:5px solid var(--blue)"><h3>Driver: ${data.driver_name}</h3><p>${data.driver_car} [${data.driver_plate}]</p><button class="btn" onclick="openChatBox('${activeReqId}', '${data.driver_name}')">CHAT</button><button class="btn" style="background:var(--amber); color:black; margin-top:10px;" onclick="finishTrip()">FINISH</button></div>`;
             }
         }
 
         async function finishTrip() {
-            if(confirm("End trip and rate?")) {
-                const snap = await db.ref('open_requests/' + activeRequestId).get();
-                const data = snap.val();
-                if(data) localStorage.setItem('pending_rating_id', data.driver_id);
-                
-                await db.ref('open_requests/' + activeRequestId).remove();
-                localStorage.removeItem('active_request_id');
+            const snap = await db.ref('open_requests/' + activeReqId).get();
+            const data = snap.val();
+            if(data) {
+                localStorage.setItem('pending_rating_id', data.driver_id);
+                // Inform driver that student finished the trip
+                await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' });
             }
         }
 
         async function submitRating() {
             const drvId = localStorage.getItem('pending_rating_id');
-            const rate = document.getElementById('rateValue').value;
-            const feedback = document.getElementById('rateFeedback').value;
-
             if(drvId) {
-                await db.ref('drivers/' + drvId + '/feedbacks').push({
-                    student: currentUser.name,
-                    rating: rate,
-                    comment: feedback,
-                    timestamp: Date.now()
-                });
+                await db.ref('drivers/' + drvId + '/feedbacks').push({ student: currentUser.name, rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, timestamp: Date.now() });
             }
             localStorage.removeItem('pending_rating_id');
-            document.getElementById('ratingModal').style.display = 'none';
             location.reload();
         }
 
-        async function cancelRequest() {
-            if(confirm("Cancel?")) {
-                await db.ref('open_requests/' + activeRequestId).remove();
-                localStorage.removeItem('active_request_id');
-                location.reload();
-            }
-        }
-
-        // CHAT LOGIC
-        function openChatBox(id, name) {
-            activeChatId = id;
-            document.getElementById('chatWith').innerText = name;
-            document.getElementById('chatPanel').style.display = 'flex';
-            db.ref('chats/' + id).on('value', snap => {
-                let h = "";
-                snap.forEach(m => {
-                    const msg = m.val();
-                    h += `<div class="bubble ${msg.sender === 'student' ? 'me' : 'them'}">${msg.text}</div>`;
-                });
-                const box = document.getElementById('chatMessages');
-                box.innerHTML = h;
-                box.scrollTop = box.scrollHeight;
-            });
-        }
+        async function cancelRequest() { if(confirm("Cancel?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
+        function openChatBox(id, n) { document.getElementById('chatWith').innerText = n; document.getElementById('chatPanel').style.display = 'flex'; db.ref('chats/'+id).on('value', snap => { let h = ""; snap.forEach(m => { const msg = m.val(); h += `<div class="bubble ${msg.sender === 'student' ? 'me' : 'them'}">${msg.text}</div>`; }); const b = document.getElementById('chatMessages'); b.innerHTML = h; b.scrollTop = b.scrollHeight; }); }
         function closeChat() { document.getElementById('chatPanel').style.display = 'none'; }
-        function sendMsg() {
-            const input = document.getElementById('chatInput');
-            if(!input.value.trim()) return;
-            db.ref('chats/' + activeRequestId).push({ sender: 'student', text: input.value });
-            input.value = "";
-        }
+        function sendMsg() { const i = document.getElementById('chatInput'); if(!i.value.trim()) return; db.ref('chats/' + activeReqId).push({ sender: 'student', text: i.value }); i.value = ""; }
     </script>
 </body>
 </html>
