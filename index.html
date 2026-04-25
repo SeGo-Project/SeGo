@@ -348,39 +348,54 @@
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
         
-        async function submitDriverApp() {
-            try {
-                const name = document.getElementById('dRegName').value.trim().toUpperCase();
-                const user = document.getElementById('dRegUser').value.trim();
-                const stuID = document.getElementById('dRegStuID').value.trim();
-                const pass = document.getElementById('dRegPass').value.trim();
-                const car = document.getElementById('dRegCar').value.trim();
-                const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
-                const phone = document.getElementById('dRegPhone').value.trim();
+       async function submitDriverApp() {
+    try {
+        const name = document.getElementById('dRegName').value.trim().toUpperCase();
+        const user = document.getElementById('dRegUser').value.trim();
+        const stuID = document.getElementById('dRegStuID').value.trim();
+        const pass = document.getElementById('dRegPass').value.trim();
+        const car = document.getElementById('dRegCar').value.trim();
+        const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
+        const phone = document.getElementById('dRegPhone').value.trim();
 
-                if(!name || !user || !stuID || pass.length < 6 || !car || !plate || !phone) {
-                    return alert("Sila isi SEMUA maklumat!");
-                }
+        if(!name || !user || !stuID || pass.length < 6 || !car || !plate || !phone) {
+            return alert("Sila isi SEMUA maklumat!");
+        }
 
-                await db.ref('driver_pending/' + stuID).set({
-                    name: name,
-                    username: user,
-                    stuID: stuID,
-                    password: pass,
-                    car: car,
-                    plate: plate,
-                    phone: String(phone),
-                    appliedAt: Date.now()
-                });
+        const driverData = {
+            name: name,
+            username: user,
+            stuID: stuID,
+            password: pass,
+            car: car,
+            plate: plate,
+            phone: String(phone),
+            appliedAt: Date.now()
+        };
 
-                alert("Application Sent!");
-                closeDriverReg();
-                
-            } catch (e) {
-                console.error("Error:", e);
-                alert("System Error: " + e.message);
-            }
-        }    
+        // 1. SIMPAN KE FIREBASE (Macam biasa)
+        await db.ref('driver_pending/' + stuID).set(driverData);
+
+        // 2. TEMBAK KE GOOGLE SHEET (Ni yang kau tertinggal)
+        // GANTIKAN URL_SCRIPT_KAU dengan URL New Deployment yang kau dapat tadi
+        const scriptURL = "URL_SCRIPT_GOOGLE_APPS_SCRIPT_KAU_KAT_SINI";
+        
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors', // Penting untuk Google Script
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(driverData)
+        });
+
+        alert("Application Sent to Firebase & Google Sheets!");
+        closeDriverReg();
+        
+    } catch (e) {
+        console.error("Error:", e);
+        alert("System Error: " + e.message);
+    }
+}
 
         function openGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'flex'; }
         function closeGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'none'; }
