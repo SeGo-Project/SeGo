@@ -6,73 +6,183 @@
     <title>SeGo | Student Portal</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --blue: #3b82f6; --amber: #fbbc04; --red: #ef4444; --green: #22c55e; --white: #ffffff; --slate: #94a3b8; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 450px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .input-field { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-        
+        :root { 
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --blue: #2563eb; 
+            --blue-hover: #1d4ed8;
+            --amber: #fbbf24; 
+            --red: #f43f5e; 
+            --green: #10b981; 
+            --white: #f8fafc; 
+            --slate: #94a3b8; 
+            --glass: rgba(30, 41, 59, 0.7);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--white); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 420px; }
+
+        h1, h2, h3, h4 { letter-spacing: -0.025em; font-weight: 700; }
+
+        .card { 
+            background: var(--card); 
+            padding: 24px; 
+            border-radius: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        }
+
+        .input-field { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 10px 0; 
+            border-radius: 12px; 
+            border: 1px solid #334155; 
+            background: #0f172a; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 0.95rem;
+            transition: border 0.3s ease;
+        }
+
+        .input-field:focus { outline: none; border-color: var(--blue); }
+
         #regName, #dRegName { text-transform: uppercase; }
-        label { font-size: 0.8rem; color: var(--slate); margin-top: 5px; display: block; }
-        .btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
-        
-        /* Overlay Driver Registration */
-        #driverRegOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:20000; display:none; flex-direction:column; padding:20px; box-sizing:border-box; overflow-y:auto; }
 
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
-        .tab-btn { flex: 1; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 10px; cursor: pointer; }
-        .tab-btn.active { background: var(--blue); border-color: var(--blue); font-weight: bold; }
-        .pax-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--blue); background: none; color: white; cursor: pointer; }
-        .pax-btn.active { background: var(--blue); font-weight: bold; }
+        label { font-size: 0.75rem; color: var(--slate); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
 
-        #infoModal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--card); width: 85%; max-width: 350px; padding: 25px; border-radius: 20px; border: 1px solid #475569; text-align: center; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 5px; }
-        .plate-box { background: var(--amber); color: black; padding: 5px 15px; border-radius: 5px; font-weight: 900; font-family: monospace; font-size: 1.2rem; }
+        .btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            border-radius: 14px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 1rem;
+            margin-top: 12px; 
+            transition: all 0.2s ease;
+        }
 
-        .booking-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--amber); }
-        .status-accepted { border-left-color: var(--green) !important; }
+        .btn:hover { background: var(--blue-hover); transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); opacity: 0.9; }
 
-        #chatPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: none; flex-direction: column; }
-        #chatMessages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .bubble { padding: 10px 15px; border-radius: 15px; max-width: 75%; font-size: 0.9rem; color: white; }
-        .bubble.me { align-self: flex-end; background: var(--blue); }
-        .bubble.them { align-self: flex-start; background: #334155; }
-        #ratingModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; }
+        .tab-bar { display: flex; gap: 12px; margin-bottom: 24px; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 16px; }
+        .tab-btn { 
+            flex: 1; 
+            padding: 12px; 
+            background: transparent; 
+            color: var(--slate); 
+            border: none;
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active { background: var(--card); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+
+        .pax-container { display: flex; justify-content: space-between; margin: 15px 0; background: #0f172a; padding: 5px; border-radius: 14px; }
+        .pax-btn { flex: 1; height: 45px; border: none; background: none; color: var(--slate); cursor: pointer; border-radius: 10px; font-weight: 700; transition: 0.2s; }
+        .pax-btn.active { background: var(--blue); color: white; }
+
+        /* Statuses */
+        .plate-box { 
+            background: #111; 
+            color: #eee; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            font-weight: 800; 
+            font-family: 'Monaco', monospace; 
+            font-size: 1.4rem; 
+            border: 2px solid #333;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .booking-item { 
+            background: rgba(255,255,255,0.03); 
+            padding: 18px; 
+            border-radius: 16px; 
+            margin-bottom: 12px; 
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+        .status-accepted { border-left: 4px solid var(--green); }
+        .status-pending { border-left: 4px solid var(--amber); }
+
+        /* Overlay & Modals */
+        #driverRegOverlay, #chatPanel { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); z-index: 20000; display: none; flex-direction: column; 
+            padding: 20px; box-sizing: border-box; overflow-y: auto;
+        }
+
+        #infoModal { 
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(15, 23, 42, 0.9); z-index: 10001; align-items:center; justify-content:center; backdrop-filter: blur(8px); 
+        }
+        .modal-content { background: var(--card); width: 85%; max-width: 360px; padding: 30px; border-radius: 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+
+        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; }
+        .bubble.me { align-self: flex-end; background: var(--blue); border-bottom-right-radius: 4px; }
+        .bubble.them { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; }
+
+        /* Animations */
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .searching-text { animation: pulse 1.5s infinite; color: var(--slate); font-weight: 500; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="loginArea">
-            <h1 style="text-align: center;">🚗 SeGo</h1>
+            <h1 style="text-align: center; font-size: 2.5rem; margin-bottom: 10px;">SeGo</h1>
+            <p style="text-align: center; color: var(--slate); margin-bottom: 30px;">UiTM Student Carpool Portal</p>
             <div class="card">
-                <input type="text" id="stuID" class="input-field" placeholder="Student ID (e.g. 2023xxxxxx)">
+                <label>Access Code</label>
+                <input type="text" id="stuID" class="input-field" placeholder="Enter Student ID">
                 <button class="btn" onclick="login()">Login</button>
-                <p style="text-align:center; font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="toggleAuth()">New here? Register Account</p>
+                <p style="text-align:center; font-size:0.85rem; cursor:pointer; color:var(--blue); margin-top:20px;" onclick="toggleAuth()">New user? Create an account</p>
             </div>
-            <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--slate);">
-                Want to earn extra? <span onclick="openDriverReg()" style="color:var(--amber); cursor:pointer; font-weight:bold; text-decoration:underline;">Register as Driver</span>
+            <p style="text-align:center; margin-top:30px; font-size:0.85rem; color:var(--slate);">
+                Partner with us. <span onclick="openDriverReg()" style="color:var(--amber); cursor:pointer; font-weight:600; text-decoration:none;">Register as Driver</span>
             </p>
         </div>
 
         <div id="registerArea" style="display: none;">
-            <h1 style="text-align: center;">Register SeGo</h1>
+            <h2 style="text-align: center;">Join SeGo</h2>
             <div class="card">
-                <input type="text" id="regID" class="input-field" placeholder="Student ID (10 Digits)">
-                <input type="text" id="regName" class="input-field" placeholder="FULL NAME (AS PER MATRIX)">
-                <input type="text" id="regPhone" class="input-field" placeholder="Phone Number">
+                <label>Student ID</label>
+                <input type="text" id="regID" class="input-field" placeholder="10-digit Matrix ID">
+                <label>Full Name</label>
+                <input type="text" id="regName" class="input-field" placeholder="Official Name">
+                <label>Phone Number</label>
+                <input type="text" id="regPhone" class="input-field" placeholder="01x-xxxxxxx">
                 <button class="btn" style="background: var(--green);" onclick="register()">Create Account</button>
-                <p style="text-align:center; font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="toggleAuth()">Already have account? Login</p>
+                <p style="text-align:center; font-size:0.85rem; cursor:pointer; color:var(--blue); margin-top:20px;" onclick="toggleAuth()">Back to Login</p>
             </div>
         </div>
 
         <div id="mainApp" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span>Hi, <b id="displayStuName"></b></span>
-                <button onclick="logout()" style="background:none; border:none; color:var(--red); cursor:pointer;">Logout</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 5px;">
+                <span style="color: var(--slate);">Welcome, <b id="displayStuName" style="color:white"></b></span>
+                <button onclick="logout()" style="background:rgba(244, 63, 94, 0.1); border:none; color:var(--red); padding: 8px 12px; border-radius: 10px; font-weight: 600; cursor:pointer;">Logout</button>
             </div>
 
             <div class="tab-bar">
@@ -82,57 +192,70 @@
 
             <div id="sectionInstant">
                 <div id="requestForm" class="card">
-                    <h4>Instant Request</h4>
-                    <label>From:</label>
+                    <h3 style="margin-top:0">Request Ride</h3>
+                    <label>Pickup Location</label>
                     <select id="insPick" class="input-field" onchange="toggleOther('insPick')">
-                        <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
+                        <option value="UiTM">UiTM Main Gate</option>
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM / Stesen Bas</option>
+                        <option value="Others">Others (Specify)</option>
                     </select>
-                    <input type="text" id="insPickOther" class="input-field" style="display:none;" placeholder="Where exactly?">
+                    <input type="text" id="insPickOther" class="input-field" style="display:none;" placeholder="Enter specific pickup location">
 
-                    <label>To:</label>
+                    <label>Destination</label>
                     <select id="insDest" class="input-field" onchange="toggleOther('insDest')">
-                        <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="UiTM">UiTM Main Gate</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM / Stesen Bas</option>
+                        <option value="Others">Others (Specify)</option>
                     </select>
-                    <input type="text" id="insDestOther" class="input-field" style="display:none;" placeholder="Destination name?">
+                    <input type="text" id="insDestOther" class="input-field" style="display:none;" placeholder="Enter specific destination">
 
-                    <label>Number of Pax:</label>
-                    <div style="display: flex; justify-content: space-around; margin: 15px 0;">
+                    <label>Passengers</label>
+                    <div class="pax-container">
                         <button class="pax-btn active" id="pax1" onclick="setPax(1)">1</button>
                         <button class="pax-btn" id="pax2" onclick="setPax(2)">2</button>
                         <button class="pax-btn" id="pax3" onclick="setPax(3)">3</button>
                         <button class="pax-btn" id="pax4" onclick="setPax(4)">4</button>
                     </div>
-                    <button class="btn" onclick="findDriver()">FIND DRIVER</button>
+                    <button class="btn" onclick="findDriver()">REQUEST NOW</button>
                 </div>
 
-                <div id="searchingState" class="card" style="display: none; text-align: center;">
-                    <p>Searching for nearby drivers...</p>
-                    <button class="btn" style="background:var(--red);" onclick="cancelRequest()">CANCEL</button>
+                <div id="searchingState" class="card" style="display: none; text-align: center; padding: 40px 20px;">
+                    <div class="searching-text" style="font-size: 1.1rem; margin-bottom: 20px;">Finding a driver nearby...</div>
+                    <button class="btn" style="background:#334155;" onclick="cancelRequest()">CANCEL REQUEST</button>
                 </div>
                 <div id="activeTripState" style="display: none;"></div>
             </div>
 
             <div id="sectionBooking" style="display: none;">
                 <div class="card">
-                    <h4>Pre-Booking</h4>
-                    <label>Date & Time:</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="date" id="bookDate" class="input-field">
-                        <input type="time" id="bookTime" class="input-field">
+                    <h3 style="margin-top:0">Schedule a Ride</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <div style="flex:1">
+                            <label>Date</label>
+                            <input type="date" id="bookDate" class="input-field">
+                        </div>
+                        <div style="flex:1">
+                            <label>Time</label>
+                            <input type="time" id="bookTime" class="input-field">
+                        </div>
                     </div>
-                    <label>From:</label>
+                    <label>Pickup</label>
                     <select id="bookPick" class="input-field" onchange="toggleOther('bookPick')">
-                        <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
+                        <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="Others">Others</option>
                     </select>
-                    <input type="text" id="bookPickOther" class="input-field" style="display:none;" placeholder="Specify pickup">
+                    <input type="text" id="bookPickOther" class="input-field" style="display:none;" placeholder="Specify location">
 
-                    <label>To:</label>
+                    <label>Destination</label>
                     <select id="bookDest" class="input-field" onchange="toggleOther('bookDest')">
-                        <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
+                        <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option><option value="Others">Others</option>
                     </select>
-                    <input type="text" id="bookDestOther" class="input-field" style="display:none;" placeholder="Specify destination">
+                    <input type="text" id="bookDestOther" class="input-field" style="display:none;" placeholder="Specify location">
 
-                    <button class="btn" style="background:var(--green);" onclick="submitBooking()">POST BOOKING</button>
+                    <button class="btn" style="background:var(--green);" onclick="submitBooking()">CONFIRM BOOKING</button>
                 </div>
                 <div id="myBookingsList"></div>
             </div>
@@ -140,31 +263,78 @@
     </div>
 
     <div id="driverRegOverlay">
-        <h2 style="text-align:center; color:var(--amber);">Driver Application</h2>
-        <div class="card">
-            <label>Full Name</label>
-            <input type="text" id="dRegName" class="input-field" placeholder="Nama Penuh">
-            <label>Student ID (For Username)</label>
-            <input type="text" id="dRegUser" class="input-field" placeholder="E.g. 2023123456">
-            <label>Password</label>
-            <input type="password" id="dRegPass" class="input-field" placeholder="Min 6 characters">
-            <label>Car Model & Color</label>
-            <input type="text" id="dRegCar" class="input-field" placeholder="E.g. Myvi Putih">
-            <label>Car Plate Number</label>
-            <input type="text" id="dRegPlate" class="input-field" placeholder="ABC 1234">
-            <label>WhatsApp Number</label>
-            <input type="text" id="dRegPhone" class="input-field" placeholder="0123456789">
-            
-            <button class="btn" style="background:var(--amber); color:black;" onclick="submitDriverApp()">SUBMIT APPLICATION</button>
-            <button class="btn" style="background:transparent; color:var(--red); border:1px solid var(--red);" onclick="closeDriverReg()">CANCEL</button>
+        <div class="container">
+            <h2 style="text-align:center; color:var(--amber); margin-bottom: 30px;">Driver Application</h2>
+            <div class="card">
+                <label>Full Name</label>
+                <input type="text" id="dRegName" class="input-field" placeholder="Full Name as per IC">
+                <label>Student ID</label>
+                <input type="text" id="dRegUser" class="input-field" placeholder="202xxxxxxx">
+                <label>Secure Password</label>
+                <input type="password" id="dRegPass" class="input-field" placeholder="Min 6 characters">
+                <label>Vehicle Info</label>
+                <input type="text" id="dRegCar" class="input-field" placeholder="E.g. Perodua Axia (Blue)">
+                <label>License Plate</label>
+                <input type="text" id="dRegPlate" class="input-field" placeholder="WXX 1234">
+                <label>Mobile Number</label>
+                <input type="text" id="dRegPhone" class="input-field" placeholder="01x-xxxxxxx">
+                
+                <button class="btn" style="background:var(--amber); color:black;" onclick="submitDriverApp()">SUBMIT APPLICATION</button>
+                <button class="btn" style="background:transparent; color:var(--red); border:1px solid var(--red);" onclick="closeDriverReg()">CLOSE</button>
+            </div>
         </div>
     </div>
 
-    <div id="infoModal"><div class="modal-content"><h3 style="color:var(--amber);">Driver Info</h3><div class="info-row"><span>Name</span><b id="mdName"></b></div><div class="info-row"><span>ID</span><b id="mdID"></b></div><div class="info-row"><span>Car</span><b id="mdCar"></b></div><div style="margin:20px 0;"><span style="font-size:0.8rem; color:var(--slate);">PLATE</span><br><div class="plate-box" id="mdPlate"></div></div><button class="btn" onclick="document.getElementById('infoModal').style.display='none'">CLOSE</button></div></div>
-    <div id="chatPanel"><div style="background:var(--blue); padding:20px; display:flex; align-items:center; color:white;"><button onclick="closeChat()" style="background:none; border:none; color:white; font-size:1.5rem;">←</button><b style="margin-left:15px;" id="chatWith">Driver</b></div><div id="chatMessages"></div><div style="padding:15px; display:flex; gap:10px; background:var(--card);"><input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type..."><button class="btn" style="width:80px; margin:0;" onclick="sendChatMsg()">Send</button></div></div>
-    <div id="ratingModal"><div class="card" style="text-align: center; width: 85%;"><h2>Trip Completed!</h2><select id="rateValue" class="input-field"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option></select><input type="text" id="rateFeedback" class="input-field" placeholder="Feedback..."><button class="btn" onclick="submitRating()">Submit</button></div></div>
+    <div id="infoModal">
+        <div class="modal-content">
+            <h3 style="margin-top:0">Driver Assigned</h3>
+            <div style="margin: 20px 0; text-align: left;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:var(--slate)">Name</span><b id="mdName"></b>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:var(--slate)">Vehicle</span><b id="mdCar"></b>
+                </div>
+            </div>
+            <label>License Plate</label><br>
+            <div class="plate-box" id="mdPlate"></div>
+            <div style="margin-top:25px;">
+                <button class="btn" onclick="document.getElementById('infoModal').style.display='none'">GOT IT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chatPanel">
+        <div style="display: flex; align-items: center; margin-bottom: 20px; padding: 10px 0;">
+            <button onclick="closeChat()" style="background:none; border:none; color:white; font-size:1.8rem; cursor:pointer;">&larr;</button>
+            <div style="margin-left:15px;">
+                <div style="font-size:0.7rem; color:var(--slate); text-transform:uppercase;">Chatting with</div>
+                <b id="chatWith" style="font-size:1.1rem;">Driver</b>
+            </div>
+        </div>
+        <div id="chatMessages" style="flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-bottom: 20px;"></div>
+        <div style="display:flex; gap:10px; background:var(--card); padding:15px; border-radius:20px;">
+            <input type="text" id="chatInput" class="input-field" style="margin:0; border:none; background:transparent;" placeholder="Type a message...">
+            <button class="btn" style="width:70px; margin:0; padding:10px;" onclick="sendChatMsg()">Send</button>
+        </div>
+    </div>
+
+    <div id="ratingModal">
+        <div class="card" style="text-align: center; width: 85%; max-width: 350px;">
+            <h3>Trip Completed</h3>
+            <p style="color:var(--slate); font-size:0.9rem;">How was your ride with the driver?</p>
+            <select id="rateValue" class="input-field">
+                <option value="5">Excellent (5 Stars)</option>
+                <option value="4">Good (4 Stars)</option>
+                <option value="3">Average (3 Stars)</option>
+            </select>
+            <input type="text" id="rateFeedback" class="input-field" placeholder="Write a brief feedback...">
+            <button class="btn" onclick="submitRating()">SUBMIT REVIEW</button>
+        </div>
+    </div>
 
     <script>
+        // --- JAVASCRIPT LOGIC KEKAL SAMA SEPERTI ASAL ---
         const firebaseConfig = { apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg", databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "carpool-uitm" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -182,7 +352,6 @@
             loadMyBookings();
         }
 
-        // --- AUTH & REGISTRATION ---
         function toggleAuth() {
             const login = document.getElementById('loginArea');
             const register = document.getElementById('registerArea');
@@ -198,7 +367,7 @@
             const check = await db.ref('students/' + id).get();
             if(check.exists()) return alert("This ID is already registered!");
             await db.ref('students/' + id).set({ name: name, phone: phone });
-            alert("Registration Successful! Now you can Login.");
+            alert("Registration Successful!");
             toggleAuth();
         }
 
@@ -210,10 +379,9 @@
                 const data = snap.val();
                 localStorage.setItem('sego_user', JSON.stringify({id: id, name: data.name}));
                 location.reload();
-            } else { alert("ID not found. Please register first!"); }
+            } else { alert("User not found!"); }
         }
 
-        // --- DRIVER REGISTRATION LOGIC ---
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
         async function submitDriverApp() {
@@ -223,17 +391,12 @@
             const car = document.getElementById('dRegCar').value.trim();
             const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
             const phone = document.getElementById('dRegPhone').value.trim();
-
-            if(!name || !user || pass.length < 6 || !car || !plate || !phone) return alert("Sila isi semua maklumat dengan betul (Password min 6 char)!");
-
-            await db.ref('driver_pending/' + user).set({
-                name: name, username: user, password: pass, car: car, plate: plate, phone: phone, appliedAt: Date.now()
-            });
-            alert("Application Sent! Sila tunggu admin hubungi anda untuk pengesahan.");
+            if(!name || !user || pass.length < 6 || !car || !plate || !phone) return alert("Please complete the form!");
+            await db.ref('driver_pending/' + user).set({ name, username: user, password: pass, car, plate, phone, appliedAt: Date.now() });
+            alert("Application Submitted!");
             closeDriverReg();
         }
 
-        // --- CORE FUNCTIONS ---
         function setPax(n) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active')); document.getElementById('pax'+n).classList.add('active'); }
         function logout() { localStorage.clear(); location.reload(); }
         function showTab(t) { document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none'; document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none'; document.getElementById('btnInstant').classList.toggle('active', t === 'instant'); document.getElementById('btnBooking').classList.toggle('active', t === 'booking'); }
@@ -270,16 +433,19 @@
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             if(s === 'ACCEPTED' && data) {
                 area.innerHTML = `<div class="card" style="border-left:5px solid var(--green)">
-                    <h4>Driver Found!</h4><p><b>${data.driver_name}</b> is coming.</p>
-                    <button class="btn" style="background:#475569" onclick="openInfo('${data.driver_name}','${data.driver_id}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
-                    <button class="btn" onclick="openChatBox('${activeReqId}','${data.driver_name}')">💬 CHAT DRIVER</button>
-                    <button class="btn" style="background:var(--amber); color:black" onclick="finishTripManual()">✅ FINISH TRIP</button>
+                    <h4 style="color:var(--green); margin-top:0">Driver Assigned</h4>
+                    <p><b>${data.driver_name}</b> is on the way.</p>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn" style="background:#334155; flex:1" onclick="openInfo('${data.driver_name}','${data.driver_id}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
+                        <button class="btn" style="flex:1" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT</button>
+                    </div>
+                    <button class="btn" style="background:rgba(251, 191, 36, 0.2); color:var(--amber); margin-top:10px" onclick="finishTripManual()">FINISH TRIP</button>
                 </div>`;
             }
         }
 
         function openInfo(name, id, car, plate) {
-            document.getElementById('mdName').innerText = name; document.getElementById('mdID').innerText = id;
+            document.getElementById('mdName').innerText = name; 
             document.getElementById('mdCar').innerText = car; document.getElementById('mdPlate').innerText = plate;
             document.getElementById('infoModal').style.display = 'flex';
         }
@@ -306,7 +472,7 @@
             await db.ref('chats/' + currentChatId).push({ sender: 'student', text: i.value }); i.value = "";
         }
         async function cancelRequest() { if(confirm("Cancel this request?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
-        async function cancelBooking(bid) { if(confirm("Cancel this booking?")) { await db.ref('bookings/' + bid).remove(); } }
+        async function cancelBooking(bid) { if(confirm("Cancel booking?")) { await db.ref('bookings/' + bid).remove(); } }
         async function finishTripManual() {
             const snap = await db.ref('open_requests/' + activeReqId).get();
             if(snap.exists()) { localStorage.setItem('pending_rating_id', snap.val().driver_id); await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' }); }
@@ -315,9 +481,9 @@
         async function submitBooking() {
             const d = document.getElementById('bookDate').value; const t = document.getElementById('bookTime').value;
             const p = getVal('bookPick'); const ds = getVal('bookDest');
-            if(!d || !t || !p || !ds) return alert("Please fill all details");
+            if(!d || !t || !p || !ds) return alert("Complete the form");
             await db.ref('bookings').push({ student_id: currentUser.id, student_name: currentUser.name, date: d, time: t, pickup: p, dest: ds, status: 'PENDING' });
-            alert("Booking Posted to Board!");
+            alert("Booking Posted!");
         }
 
         function loadMyBookings() {
@@ -326,15 +492,15 @@
                     const b = c.val(); 
                     if(b.student_id === currentUser.id) {
                         const isAcc = b.status === 'ACCEPTED';
-                        h += `<div class="booking-item ${isAcc ? 'status-accepted' : ''}">
-                            <b>${b.pickup} ➔ ${b.dest}</b><br>
-                            <small>${b.date} | ${b.time} | <b>${b.status}</b></small><br>
-                            ${isAcc ? `<button class="btn" style="padding:8px; font-size:0.8rem;" onclick="openChatBox('${c.key}', '${b.driver_name}')">💬 CHAT DRIVER</button>` : 
-                            `<button class="btn" style="background:var(--red); padding:8px; font-size:0.8rem;" onclick="cancelBooking('${c.key}')">❌ CANCEL</button>`}
+                        h += `<div class="booking-item ${isAcc ? 'status-accepted' : 'status-pending'}">
+                            <div style="font-weight:700; margin-bottom:5px;">${b.pickup} &rarr; ${b.dest}</div>
+                            <div style="font-size:0.8rem; color:var(--slate); margin-bottom:10px;">${b.date} | ${b.time}</div>
+                            ${isAcc ? `<button class="btn" style="padding:10px; font-size:0.8rem;" onclick="openChatBox('${c.key}', '${b.driver_name}')">CHAT DRIVER</button>` : 
+                            `<button class="btn" style="background:rgba(244, 63, 94, 0.1); color:var(--red); padding:10px; font-size:0.8rem;" onclick="cancelBooking('${c.key}')">CANCEL</button>`}
                         </div>`;
                     }
                 });
-                document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:gray;'>No bookings yet.</p>";
+                document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:gray; font-size:0.9rem;'>No active bookings.</p>";
             });
         }
     </script>
