@@ -99,10 +99,8 @@
         .bubble.me { align-self: flex-end; background: var(--blue); }
         .bubble.them { align-self: flex-start; background: #334155; }
         
-        /* Modals for Rating & Feedback */
         #ratingModal, #generalFeedbackModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         
-        /* Star Rating System */
         .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-direction: row-reverse; }
         .stars input { display: none; }
         .stars label { font-size: 35px; color: #334155; cursor: pointer; transition: 0.2s; }
@@ -226,15 +224,23 @@
             <h2 style="text-align:center; margin-bottom:25px;">Driver Application</h2>
             <div class="card">
                 <label>Full Name</label>
-                <input type="text" id="dRegName" class="input-field" placeholder="Full Name">
-                <label>Student ID (Username)</label>
-                <input type="text" id="dRegUser" class="input-field" placeholder="E.g. 2023123456">
+                <input type="text" id="dRegName" class="input-field" placeholder="Nama Penuh (Ikut Kad Matrik)">
+                
+                <label>Username</label>
+                <input type="text" id="dRegUser" class="input-field" placeholder="Username Pilihan">
+                
+                <label>Student ID</label>
+                <input type="text" id="dRegStuID" class="input-field" placeholder="E.g. 2023123456">
+                
                 <label>Password</label>
                 <input type="password" id="dRegPass" class="input-field" placeholder="Min 6 characters">
+                
                 <label>Car Model & Color</label>
                 <input type="text" id="dRegCar" class="input-field" placeholder="E.g. Perodua Myvi (White)">
+                
                 <label>Car Plate Number</label>
                 <input type="text" id="dRegPlate" class="input-field" placeholder="ABC 1234">
+                
                 <label>Phone Number (WhatsApp)</label>
                 <input type="text" id="dRegPhone" class="input-field" placeholder="0123456789">
                 
@@ -352,22 +358,35 @@
             } else { alert("ID not found. Please register first!"); }
         }
 
-        // --- DRIVER REGISTRATION LOGIC ---
+        // --- DRIVER REGISTRATION LOGIC (UPDATED) ---
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
+        
         async function submitDriverApp() {
             const name = document.getElementById('dRegName').value.trim().toUpperCase();
             const user = document.getElementById('dRegUser').value.trim();
+            const stuID = document.getElementById('dRegStuID').value.trim();
             const pass = document.getElementById('dRegPass').value.trim();
             const car = document.getElementById('dRegCar').value.trim();
             const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
             const phone = document.getElementById('dRegPhone').value.trim();
 
-            if(!name || !user || pass.length < 6 || !car || !plate || !phone) return alert("Sila isi semua maklumat dengan betul (Password min 6 char)!");
+            if(!name || !user || !stuID || pass.length < 6 || !car || !plate || !phone) {
+                return alert("Sila isi semua maklumat dengan betul!");
+            }
 
+            // Guna username sebagai key utama dalam database
             await db.ref('driver_pending/' + user).set({
-                name: name, username: user, password: pass, car: car, plate: plate, phone: phone, appliedAt: Date.now()
+                name: name,
+                username: user,
+                studentID: stuID,
+                password: pass,
+                car: car,
+                plate: plate,
+                phone: phone,
+                appliedAt: Date.now()
             });
+            
             alert("Application Sent! Sila tunggu admin hubungi anda untuk pengesahan.");
             closeDriverReg();
         }
@@ -378,20 +397,15 @@
         async function submitGeneralFeedback() {
             const rating = document.querySelector('input[name="g_rating"]:checked')?.value;
             const comment = document.getElementById('g_comment').value.trim();
-            
             if(!rating) return alert("Please select a star rating");
-
             await db.ref('feedbacks/app_general').push({
                 student_name: currentUser ? currentUser.name : "Anonymous",
                 rating: rating,
                 comment: comment,
                 timestamp: Date.now()
             });
-
             alert("Thank you! Your feedback has been submitted.");
             closeGeneralFeedback();
-            document.getElementById('g_comment').value = '';
-            document.querySelector('input[name="g_rating"]:checked').checked = false;
         }
 
         // --- CORE FUNCTIONS ---
@@ -449,9 +463,7 @@
             const rating = document.querySelector('input[name="rating"]:checked')?.value;
             const comment = document.getElementById('rateFeedback').value.trim();
             const drvId = localStorage.getItem('pending_rating_id');
-
             if(!rating) return alert("Please select a star rating");
-
             if(drvId) { 
                 await db.ref('feedbacks/' + drvId).push({ 
                     student_name: currentUser.name, 
@@ -461,7 +473,6 @@
                 }); 
             }
             if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); await db.ref('chats/' + activeReqId).remove(); }
-            
             localStorage.removeItem('active_request_id');
             localStorage.removeItem('pending_rating_id');
             location.reload();
