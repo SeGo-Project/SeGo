@@ -422,15 +422,19 @@
             });
         }
 
-        function updateUI(s, data = null) {
+       function updateUI(s, data = null) {
             document.getElementById('requestForm').style.display = s === 'IDLE' ? 'block' : 'none';
             document.getElementById('searchingState').style.display = s === 'SEARCHING' ? 'block' : 'none';
             const area = document.getElementById('activeTripState');
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             
             if(s === 'ACCEPTED' && data) {
-                // SINI KITA PAKSA AMBIL DRIVER ID (MATRIX ID) YANG DIHANTAR OLEH DRIVER APP
-                const displayID = data.driver_id ? String(data.driver_id).toUpperCase() : "DRIVER";
+                // LOGIK BARU: 
+                // 1. Cuba ambil driver_stuID (Nombor Matrik)
+                // 2. Kalau tak ada, cuba ambil stuID
+                // 3. Kalau dua-dua tak ada, baru guna driver_id (Username)
+                let displayID = data.driver_stuID || data.stuID || data.driver_id || "DRIVER";
+                displayID = String(displayID).toUpperCase();
                 
                 area.innerHTML = `
                 <div class="card" style="border-left:4px solid var(--green)">
@@ -445,7 +449,7 @@
                     <button class="btn" style="background:var(--white); color:var(--bg);" onclick="finishTripManual()">FINISH TRIP</button>
                 </div>`;
             }
-        }
+        }  
 
         async function finishTripManual() {
             if(confirm("Dah sampai ke destinasi? Tekan OK untuk beri rating.")) {
