@@ -275,7 +275,7 @@
         <div class="modal-content">
             <h3>Driver Information</h3>
             <div class="info-row"><span>Name</span><b id="mdName"></b></div>
-            <div class="info-row"><span>Driver ID</span><b id="mdID"></b></div>
+            <div class="info-row"><span>Student ID</span><b id="mdID"></b></div>
             <div class="info-row"><span>Car</span><b id="mdCar"></b></div>
             <div style="margin: 25px 0 15px 0; text-align:center;">
                 <span style="font-size:0.8rem; color:var(--slate);">PLATE NO</span><br>
@@ -437,7 +437,7 @@
                     <h4 style="color:var(--green)">Driver Found!</h4>
                     <p><b>${data.driver_name}</b> is on the way.</p>
                     <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; margin-bottom:15px;">
-                        <small style="color:var(--slate)">Driver ID:</small> <b>${displayID}</b><br>
+                        <small style="color:var(--slate)">Student ID:</small> <b>${displayID}</b><br>
                         <small style="color:var(--slate)">Vehicle:</small> <b>${data.driver_car} (${data.driver_plate})</b>
                     </div>
                     <button class="btn" onclick="openInfo('${data.driver_name}','${displayID}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
