@@ -11,19 +11,21 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #334155; }
-        .input-field { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-        .btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .input-field { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        .btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .pax-container { display: flex; justify-content: space-around; margin: 10px 0; }
         .pax-btn { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #334155; background: transparent; color: white; cursor: pointer; }
         .pax-btn.active { background: var(--blue); border-color: var(--blue); }
         .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
         .tab-btn { flex: 1; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: var(--blue); border-color: var(--blue); font-weight: bold; }
+        label { font-size: 0.8rem; color: var(--slate); font-weight: bold; margin-top: 5px; display: block; }
         .loader { border: 4px solid #334155; border-top: 4px solid var(--blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #ratingModal, #chatPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; }
+        #ratingModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; }
         .modal-box { background: var(--card); width: 85%; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--blue); }
         .booking-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--blue); }
+        .cancel-btn { color: var(--red); background: none; border: none; font-size: 0.7rem; cursor: pointer; text-decoration: underline; padding: 0; }
     </style>
 </head>
 <body>
@@ -51,7 +53,9 @@
 
             <div id="sectionInstant">
                 <div id="requestForm" class="card">
-                    <h4>Instant Request</h4>
+                    <h4 style="margin-top:0;">Instant Request</h4>
+                    
+                    <label>FROM:</label>
                     <select id="pickupSelect" class="input-field" onchange="toggleOthers('pickup')">
                         <option value="US Sentral">US Sentral</option>
                         <option value="UiTM">UiTM</option>
@@ -59,8 +63,9 @@
                         <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
                         <option value="Others">Others</option>
                     </select>
-                    <input type="text" id="pickupOthers" class="input-field" style="display:none;" placeholder="Type pickup">
+                    <input type="text" id="pickupOthers" class="input-field" style="display:none;" placeholder="Specify location">
 
+                    <label>DESTINATION:</label>
                     <select id="dropSelect" class="input-field" onchange="toggleOthers('drop')">
                         <option value="UiTM">UiTM</option>
                         <option value="US Sentral">US Sentral</option>
@@ -68,8 +73,9 @@
                         <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
                         <option value="Others">Others</option>
                     </select>
-                    <input type="text" id="dropOthers" class="input-field" style="display:none;" placeholder="Type destination">
+                    <input type="text" id="dropOthers" class="input-field" style="display:none;" placeholder="Specify destination">
 
+                    <label>PAX:</label>
                     <div class="pax-container">
                         <button class="pax-btn active" onclick="setPax(1, this)">1</button>
                         <button class="pax-btn" onclick="setPax(2, this)">2</button>
@@ -90,10 +96,33 @@
 
             <div id="sectionBooking" style="display: none;">
                 <div class="card">
-                    <h4>Book for Later</h4>
-                    <input type="date" id="bookDate" class="input-field">
-                    <input type="time" id="bookTime" class="input-field">
-                    <input type="text" id="bookDest" class="input-field" placeholder="Destination">
+                    <h4 style="margin-top:0;">Schedule a Ride</h4>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <div style="flex:1;"><label>DATE:</label><input type="date" id="bookDate" class="input-field"></div>
+                        <div style="flex:1;"><label>TIME:</label><input type="time" id="bookTime" class="input-field"></div>
+                    </div>
+
+                    <label>FROM:</label>
+                    <select id="bookPickupSelect" class="input-field" onchange="toggleOthers('bookPickup')">
+                        <option value="UiTM">UiTM</option>
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <input type="text" id="bookPickupOthers" class="input-field" style="display:none;" placeholder="Specify location">
+
+                    <label>DESTINATION:</label>
+                    <select id="bookDropSelect" class="input-field" onchange="toggleOthers('bookDrop')">
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="UiTM">UiTM</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <input type="text" id="bookDropOthers" class="input-field" style="display:none;" placeholder="Specify destination">
+
                     <button class="btn" style="background:var(--green);" onclick="submitBooking()">SCHEDULE BOOKING</button>
                 </div>
                 <h4 style="margin-top:20px;">My Pre-Bookings</h4>
@@ -140,8 +169,13 @@
         }
 
         function setPax(n, b) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); }
-        function toggleOthers(t) { document.getElementById(t+'Others').style.display = document.getElementById(t+'Select').value === 'Others' ? 'block' : 'none'; }
         
+        function toggleOthers(id) { 
+            const select = document.getElementById(id + 'Select');
+            const otherInput = document.getElementById(id + 'Others');
+            otherInput.style.display = select.value === 'Others' ? 'block' : 'none';
+        }
+
         function showTab(t) {
             document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none';
             document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none';
@@ -149,7 +183,6 @@
             document.getElementById('btnBooking').className = t === 'booking' ? 'tab-btn active' : 'tab-btn';
         }
 
-        // INSTANT RIDE LOGIC
         async function findDriver() {
             const p = document.getElementById('pickupSelect').value === 'Others' ? document.getElementById('pickupOthers').value : document.getElementById('pickupSelect').value;
             const d = document.getElementById('dropSelect').value === 'Others' ? document.getElementById('dropOthers').value : document.getElementById('dropSelect').value;
@@ -167,7 +200,7 @@
                 const data = snap.val();
                 if(!data) {
                     if(localStorage.getItem('pending_rating_id')) document.getElementById('ratingModal').style.display = 'flex';
-                    else { updateUI('IDLE'); }
+                    else updateUI('IDLE');
                     return;
                 }
                 if(data.status === 'ACCEPTED') updateUI('ACCEPTED', data);
@@ -206,15 +239,18 @@
             location.reload();
         }
 
-        // PRE-BOOKING LOGIC (YANG HILANG TADI)
+        // PRE-BOOKING LOGIC (With Cancel & Dropdowns)
         async function submitBooking() {
             const date = document.getElementById('bookDate').value;
             const time = document.getElementById('bookTime').value;
-            const dest = document.getElementById('bookDest').value;
-            if(!date || !time || !dest) return alert("Fill all fields");
+            const p = document.getElementById('bookPickupSelect').value === 'Others' ? document.getElementById('bookPickupOthers').value : document.getElementById('bookPickupSelect').value;
+            const d = document.getElementById('bookDropSelect').value === 'Others' ? document.getElementById('bookDropOthers').value : document.getElementById('bookDropSelect').value;
+            
+            if(!date || !time || !p || !d) return alert("Fill all fields");
+            
             await db.ref('bookings').push({
                 student_id: currentUser.id, student_name: currentUser.name,
-                date, time, dest, status: 'PENDING'
+                date, time, pickup: p, dest: d, status: 'PENDING', timestamp: Date.now()
             });
             alert("Booking Posted!");
             showTab('booking');
@@ -225,16 +261,22 @@
                 let html = "";
                 snap.forEach(child => {
                     const b = child.val();
+                    const key = child.key;
                     if(b.student_id === currentUser.id) {
                         const statusColor = b.status === 'ACCEPTED' ? 'var(--green)' : 'var(--amber)';
                         html += `
                         <div class="booking-item">
-                            <div style="display:flex; justify-content:space-between;">
-                                <b>To: ${b.dest}</b>
+                            <div style="display:flex; justify-content:space-between; align-items:start;">
+                                <div style="font-size:0.9rem;">
+                                    <b>${b.pickup} ➔ ${b.dest}</b><br>
+                                    <small>${b.date} @ ${b.time}</small>
+                                </div>
                                 <span style="color:${statusColor}; font-size:0.7rem; font-weight:bold;">${b.status}</span>
                             </div>
-                            <small>${b.date} | ${b.time}</small><br>
-                            ${b.driver_name ? `<small>Driver: ${b.driver_name}</small>` : ''}
+                            <div style="margin-top:8px; display:flex; justify-content:space-between;">
+                                <span>${b.driver_name ? `<small>Driver: ${b.driver_name}</small>` : ''}</span>
+                                ${b.status === 'PENDING' ? `<button class="cancel-btn" onclick="cancelBooking('${key}')">Cancel</button>` : ''}
+                            </div>
                         </div>`;
                     }
                 });
@@ -242,6 +284,7 @@
             });
         }
 
+        async function cancelBooking(key) { if(confirm("Cancel this booking?")) await db.ref('bookings/' + key).remove(); }
         async function cancelRequest() { if(confirm("Cancel?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
     </script>
 </body>
