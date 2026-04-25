@@ -362,7 +362,6 @@
                     return alert("Sila isi SEMUA maklumat!");
                 }
 
-                // Guna stuID sebagai key supaya admin senang trace ID asal
                 await db.ref('driver_pending/' + stuID).set({
                     name: name,
                     username: user,
@@ -409,47 +408,60 @@
             listenToRequest();
         }
 
+        // --- UPDATED LISTEN TO REQUEST (AUTO-FETCH STUDENT ID) ---
         function listenToRequest() {
             if(!activeReqId) return;
-            db.ref('open_requests/' + activeReqId).on('value', snap => {
+            db.ref('open_requests/' + activeReqId).on('value', async snap => {
                 const data = snap.val();
                 if(!data) { updateUI('IDLE'); return; }
-                if(data.status === 'ACCEPTED') updateUI('ACCEPTED', data);
+                
+                if(data.status === 'ACCEPTED') {
+                    // Cari nombor matrik sebenar dari node drivers guna username (driver_id)
+                    let realStuID = data.driver_id;
+                    try {
+                        const drvSnap = await db.ref('drivers/' + data.driver_id).get();
+                        if(drvSnap.exists()) {
+                            // Ambil stuID dari profil driver
+                            realStuID = drvSnap.val().stuID || data.driver_id;
+                        }
+                    } catch(e) { console.error("Error matrik:", e); }
+                    
+                    data.display_id = realStuID; // Masukkan ke data temp
+                    updateUI('ACCEPTED', data);
+                }
                 else if(data.status === 'COMPLETED') {
                     localStorage.setItem('pending_rating_id', data.driver_id);
                     document.getElementById('ratingModal').style.display = 'flex';
-                } else updateUI('SEARCHING');
+                } else {
+                    updateUI('SEARCHING');
+                }
             });
         }
 
-       function updateUI(s, data = null) {
+        // --- UPDATED UPDATE UI ---
+        function updateUI(s, data = null) {
             document.getElementById('requestForm').style.display = s === 'IDLE' ? 'block' : 'none';
             document.getElementById('searchingState').style.display = s === 'SEARCHING' ? 'block' : 'none';
             const area = document.getElementById('activeTripState');
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             
             if(s === 'ACCEPTED' && data) {
-                // LOGIK BARU: 
-                // 1. Cuba ambil driver_stuID (Nombor Matrik)
-                // 2. Kalau tak ada, cuba ambil stuID
-                // 3. Kalau dua-dua tak ada, baru guna driver_id (Username)
-                let displayID = data.driver_stuID || data.stuID || data.driver_id || "DRIVER";
-                displayID = String(displayID).toUpperCase();
+                const finalID = String(data.display_id || data.driver_id).toUpperCase();
                 
                 area.innerHTML = `
                 <div class="card" style="border-left:4px solid var(--green)">
                     <h4 style="color:var(--green)">Driver Found!</h4>
                     <p><b>${data.driver_name}</b> is on the way.</p>
                     <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; margin-bottom:15px;">
-                        <small style="color:var(--slate)">Student ID:</small> <b>${displayID}</b><br>
+                        <small style="color:var(--slate)">Student ID:</small> <b>${finalID}</b><br>
                         <small style="color:var(--slate)">Vehicle:</small> <b>${data.driver_car} (${data.driver_plate})</b>
                     </div>
-                    <button class="btn" onclick="openInfo('${data.driver_name}','${displayID}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
+                    <button class="btn" onclick="openInfo('${data.driver_name}','${finalID}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
                     <button class="btn" style="background:var(--amber)" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT DRIVER</button>
                     <button class="btn" style="background:var(--white); color:var(--bg);" onclick="finishTripManual()">FINISH TRIP</button>
                 </div>`;
             }
-        }  
+        }
 
         async function finishTripManual() {
             if(confirm("Dah sampai ke destinasi? Tekan OK untuk beri rating.")) {
@@ -483,7 +495,7 @@
         function openChatBox(id, name) {
             currentChatId = id; document.getElementById('chatWith').innerText = name;
             document.getElementById('chatPanel').style.display = 'flex';
-            db.ref('chats/' + id).off(); // Clear existing listener
+            db.ref('chats/' + id).off();
             db.ref('chats/' + id).on('value', snap => {
                 let h = ""; snap.forEach(m => { const msg = m.val(); h += `<div class="bubble ${msg.sender==='student'?'me':'them'}">${msg.text}</div>`; });
                 const b = document.getElementById('chatMessages'); b.innerHTML = h; b.scrollTop = b.scrollHeight;
