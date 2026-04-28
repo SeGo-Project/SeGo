@@ -373,11 +373,10 @@
             appliedAt: Date.now()
         };
 
-        // 1. SIMPAN KE FIREBASE (Macam biasa)
+      
         await db.ref('driver_pending/' + stuID).set(driverData);
 
-        // 2. TEMBAK KE GOOGLE SHEET (Ni yang kau tertinggal)
-        // GANTIKAN URL_SCRIPT_KAU dengan URL New Deployment yang kau dapat tadi
+     
         const scriptURL = "https://script.google.com/macros/s/AKfycbw09CNxNQSp22n1gUq6-vqkkDR16Ek5a9TprYsOJb4BloYQP3Upqk-RMwN4M1TUArbLoQ/exec";
         
         fetch(scriptURL, {
