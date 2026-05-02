@@ -34,41 +34,10 @@
         .plate-box { background: #000; color: #fff; padding: 10px 15px; border-radius: 4px; font-weight: 600; font-family: monospace; font-size: 1.2rem; border: 1px solid var(--border); text-align: center; }
         .booking-item { background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border); border-left: 4px solid var(--amber); }
         .status-accepted { border-left-color: var(--green) !important; }
-        #chatPanel { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    background: var(--bg); 
-    z-index: 9999; 
-    display: none; 
-    flex-direction: column; 
-}
-#chatPanel.open { 
-    display: flex; 
-}
-        #chatMessages { 
-    flex: 1; 
-    min-height: 0; 
-    padding: 20px; 
-    overflow-y: auto; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-}
-        #callModal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: var(--bg);
-    z-index: 19999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
+        #chatPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: none; flex-direction: column; overflow: hidden; }
+        #chatPanel.open { display: flex; }
+        #chatMessages { flex: 1; min-height: 0; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        #callModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 19999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         #callDriverName { margin-top:25px; font-size:28px; font-weight:700; }
         #callStatusText { color:#94a3b8; font-size:16px; margin-top:8px; }
         .call-wave { margin-top:18px; }
@@ -260,9 +229,14 @@
 </div>
 
 <div id="chatPanel">
-    <div style="background: var(--card); padding: 20px; display: flex; align-items: center; color: white; border-bottom: 1px solid var(--border);">
-        <button onclick="closeChat()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">←</button>
-        <b style="margin-left:15px; font-size:1.1rem;" id="chatWith">Driver</b>
+    <div style="background: var(--card); padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); flex-shrink: 0;">
+        <button onclick="closeChat()" style="background:none; border:none; color:var(--white); font-size:1.5rem; cursor:pointer; padding:0 4px;">←</button>
+        <div style="width:36px; height:36px; border-radius:50%; background:var(--blue); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px; color:#fff; flex-shrink:0;" id="chatAvatar">D</div>
+        <div style="flex:1;">
+            <div style="font-weight:600; font-size:14px;" id="chatWith">Driver</div>
+            <div style="font-size:11px; color:var(--slate);">Online</div>
+        </div>
+        <button onclick="startCall(window.currentDriverId)" style="width:38px; height:38px; border-radius:50%; background:rgba(37,99,235,0.15); border:1px solid var(--blue); color:var(--blue); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">&#128222;</button>
     </div>
     <div id="chatMessages" style="flex:1; min-height:0; height:0; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px;"></div>
     <div style="padding:15px; display:flex; gap:10px; flex-wrap: wrap; background:var(--card); border-top: 1px solid var(--border); flex-shrink:0;">
@@ -280,7 +254,7 @@
         </div>
         <h2 id="callDriverName">Driver</h2>
         <p id="callStatusText">Calling...</p>
-        <audio id="remoteAudio" autoplay></audio>
+        <audio id="remoteAudio" autoplay playsinline></audio>
         <div class="call-wave">
             <span></span><span></span><span></span>
         </div>
@@ -341,10 +315,13 @@
             };
 
             // Terima audio dari driver
-            peerConnection.ontrack = (event) => {
-                const audio = document.getElementById('remoteAudio');
-                if (audio) audio.srcObject = event.streams[0];
-            };
+peerConnection.ontrack = (event) => {
+    const audio = document.getElementById('remoteAudio');
+    if (audio) {
+        audio.srcObject = event.streams[0];
+        audio.play().catch(e => console.warn('play error:', e));
+    }
+};
 
             peerConnection.onconnectionstatechange = () => {
                 if (peerConnection.connectionState === 'connected') {
@@ -387,6 +364,13 @@
             });
             callListeners.push({ ref: iceRef, type: 'child_added' });
 
+            // Listen kalau driver hangup
+            const statusRef = db.ref(`calls/${callId}/status`);
+            statusRef.on('value', snap => {
+                if (snap.val() === 'ended') hangupCall(false);
+            });
+            callListeners.push({ ref: statusRef, type: 'value' });
+
         } catch (err) {
             console.error("startCall error:", err);
             alert("Gagal buat panggilan: " + err.message);
@@ -394,7 +378,7 @@
         }
     }
 
-    function hangupCall(removeFromDB = true) {
+   function hangupCall(removeFromDB = true) {
         callListeners.forEach(({ ref, type }) => ref.off(type));
         callListeners = [];
 
@@ -403,6 +387,10 @@
 
         const modal = document.getElementById('callModal');
         if (modal) modal.style.display = 'none';
+
+        const chatPanel = document.getElementById('chatPanel');                    // tambah
+        if (chatPanel) chatPanel.classList.add('open');                            // tambah
+
         const remoteAudio = document.getElementById('remoteAudio');
         if (remoteAudio) remoteAudio.srcObject = null;
 
@@ -557,7 +545,7 @@
         });
     }
 
-    function updateUI(s, data = null) {
+   function updateUI(s, data = null) {
         document.getElementById('requestForm').style.display = s === 'IDLE' ? 'block' : 'none';
         document.getElementById('searchingState').style.display = s === 'SEARCHING' ? 'block' : 'none';
         const area = document.getElementById('activeTripState');
@@ -572,7 +560,6 @@
                     <strong>Payment Info:</strong> ${data.payment_info}<br>
                     <small style="color:var(--slate)">Show receipt to driver before finish the trip.</small>
                 </div>` : '';
-            const callButton = data.driver_id ? `<button class="btn" style="background:#334155;" onclick="startCall('${data.driver_id}')">CALL DRIVER</button>` : '';
             area.innerHTML = `
             <div class="card" style="border-left:4px solid var(--green)">
                 <h4 style="color:${stateColor}">${stateLabel}</h4>
@@ -583,8 +570,7 @@
                 </div>
                 <button class="btn" onclick="openInfo('${data.driver_name}','${finalID}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
                 <div class="chat-action-row">
-                    <button id="chatDriverBtn" class="btn" style="background:var(--amber)" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT DRIVER <span id="chatUnreadBadge" class="small-badge" style="display:none;">!</span></button>
-                    ${callButton}
+                    <button id="chatDriverBtn" class="btn" style="background:var(--amber)" onclick="openChatBox('${activeReqId}','${data.driver_name}','${data.driver_id}')">CHAT DRIVER <span id="chatUnreadBadge" class="small-badge" style="display:none;">!</span></button>
                 </div>
                 ${paymentHtml}
                 <button class="btn" style="background:var(--white); color:var(--bg);" onclick="finishTripManual()">COMPLETE PAYMENT</button>
@@ -713,9 +699,12 @@
 
     let _chatDisplayListener = null;
 
-    async function openChatBox(id, name) {
+   async function openChatBox(id, name, driverId = null) {
         currentChatId = id;
-        document.getElementById('chatWith').innerText = name;
+        window.currentDriverId = driverId;
+        console.log('driverId:', driverId);
+        document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
+        document.getElementById('chatWith').textContent = name;
         document.getElementById('chatPanel').classList.add('open');
         const b = document.getElementById('chatMessages');
         b.innerHTML = '';
